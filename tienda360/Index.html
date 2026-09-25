@@ -1,1 +1,586 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tienda 360 de demostración — Qué Facha</title>
+<meta name="description" content="Recorré una tienda 360: tocá los productos, armá tu carrito y hacé el pedido por WhatsApp. Demo de Qué Facha, Durazno.">
+<!--
+  VISTA PREVIA AL COMPARTIR (WhatsApp, Facebook, etc.)
+  Cuando publiques en GitHub Pages, reemplazá DIRECCION-DE-TU-WEB por la dirección real
+  (por ejemplo: https://tu-usuario.github.io/quefacha). Tiene que ser una dirección completa.
+-->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Entrá a la tienda 360 de Qué Facha">
+<meta property="og:description" content="Recorré la sala, tocá los productos y pedí por WhatsApp. Así podría verse tu tienda.">
+<meta property="og:image" content="DIRECCION-DE-TU-WEB/tienda360/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="DIRECCION-DE-TU-WEB/tienda360/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2E2F33">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232E2F33'/%3E%3Cg fill='%23F2EEE6'%3E%3Cpath d='M8 16h12v18a6 6 0 0 1-12 0z'/%3E%3Cpath d='M32 16h12v18a6 6 0 0 1-12 0z'/%3E%3C/g%3E%3Cg fill='%23B0674A'%3E%3Cpath d='M20 16h12v18a6 6 0 0 1-12 0z'/%3E%3Cpath d='M44 16h12v18a6 6 0 0 1-12 0z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grafito: #2E2F33; --hueso: #F2EEE6; --hueso-2: #E2DBCF; --cuero: #B0674A;
+    --cuero-osc: #8F4F37; --piedra: #8A8780; --texto-2: #58595E; --rojo: #D93A2F;
+    --fuente: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: #1c1d20; font-family: var(--fuente); color: var(--grafito); }
+  button { font-family: inherit; cursor: pointer; }
 
+  /* ---------- Escena 360 (habitación de 6 caras en CSS 3D) ---------- */
+  #stage { position: fixed; inset: 0; overflow: hidden; background: linear-gradient(180deg, #F4F0E8 0 50%, #C29B76 50% 100%); touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; }
+  #stage.arrastrando { cursor: grabbing; }
+  #stage.sobre-objeto { cursor: pointer; }
+  #scene { position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d; }
+  .cara { position: absolute; transform-style: flat; overflow: hidden; }
+  .pared { position: absolute; left: 0; top: 0; background: linear-gradient(180deg, #F6F3EC 0%, var(--hueso) 55%, #E9E3D8 100%); }
+  .pared::before { /* sombra en las esquinas */
+    content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(46,47,51,.10), transparent 12%, transparent 88%, rgba(46,47,51,.10));
+  }
+  .pared::after { /* zócalo */
+    content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: var(--grafito);
+  }
+  .piso { background-color: #C29B76; background-image:
+      repeating-linear-gradient(90deg, rgba(0,0,0,.08) 0 2px, transparent 2px 140px),
+      repeating-linear-gradient(0deg, #C7A07B 0 70px, #BD9571 70px 140px); }
+  .techo { background-color: #F7F4EE; }
+  #baldosas, #paredes { position: absolute; left: 0; top: 0; transform-style: preserve-3d; }
+  #fuentes { position: fixed; left: -20000px; top: 0; visibility: hidden; pointer-events: none; }
+  #scene { pointer-events: none; }
+
+  /* ---------- Pared frontal: logo ---------- */
+  .logo-pared { position: absolute; left: 50%; top: 270px; transform: translateX(-50%); text-align: center; }
+  .toldo { display: flex; justify-content: center; }
+  .toldo span { width: 60px; height: 74px; border-radius: 0 0 30px 30px; }
+  .toldo-barra { height: 16px; background: var(--grafito); }
+  .logo-pared .nombre { font-size: 120px; font-weight: 700; letter-spacing: -0.03em; line-height: 1; margin-top: 30px; white-space: nowrap; }
+  .logo-pared .lema { font-size: 40px; color: var(--texto-2); margin-top: 18px; }
+
+  /* ---------- Pared derecha: remeras ---------- */
+  .remeras { position: absolute; left: 0; right: 0; top: 150px; display: flex; justify-content: center; gap: 70px; }
+  .barral { position: absolute; left: 180px; right: 180px; top: 150px; height: 12px; border-radius: 6px; background: var(--grafito); }
+  .remera { position: relative; width: 300px; background: none; border: 0; padding-top: 50px; transition: transform .25s; }
+  .remera .percha { position: absolute; left: 50%; top: 0; width: 90px; height: 56px; transform: translateX(-50%); }
+  .remera .etiqueta { display: block; margin-top: 16px; font-size: 30px; font-weight: 500; color: var(--grafito); }
+  .remera .etiqueta small { display: block; font-size: 26px; font-weight: 400; color: var(--texto-2); }
+  .pulso { position: absolute; right: 18px; top: 100px; width: 54px; height: 54px; border-radius: 50%;
+    background: var(--cuero); color: #fff; font-size: 38px; line-height: 54px; font-weight: 700; text-align: center;
+    box-shadow: 0 0 0 0 rgba(176,103,74,.6); animation: pulso 2s infinite; }
+  @keyframes pulso { 0% { box-shadow: 0 0 0 0 rgba(176,103,74,.55); } 70% { box-shadow: 0 0 0 26px rgba(176,103,74,0); } 100% { box-shadow: 0 0 0 0 rgba(176,103,74,0); } }
+
+  /* ---------- Pared izquierda: mostrador y caja ---------- */
+  .toldo-mostrador { position: absolute; left: 330px; right: 330px; top: 120px; }
+  .toldo-mostrador .toldo span { width: 74px; }
+  .mostrador { position: absolute; left: 330px; right: 330px; bottom: 34px; height: 330px; }
+  .mostrador .tapa { position: absolute; left: -20px; right: -20px; top: 0; height: 32px; background: var(--grafito); border-radius: 6px; }
+  .mostrador .frente { position: absolute; left: 0; right: 0; top: 32px; bottom: 0;
+    background: repeating-linear-gradient(90deg, var(--cuero) 0 88px, var(--cuero-osc) 88px 92px); }
+  .mostrador .rotulo { position: absolute; left: 50%; top: 90px; transform: translateX(-50%); font-size: 64px; font-weight: 700; color: var(--hueso); letter-spacing: -0.02em; }
+  .caja { position: absolute; left: 50%; bottom: 362px; transform: translateX(-50%); background: none; border: 0; width: 260px; transition: transform .25s; }
+  .caja .pulso { right: -26px; top: 50px; }
+  .caja-texto { display: inline-block; font-size: 30px; font-weight: 700; margin-bottom: 14px; color: var(--hueso); background: var(--grafito); padding: 8px 20px; border-radius: 999px; white-space: nowrap; }
+
+  /* ---------- Pared trasera: cuadro y planta ---------- */
+  .cuadro { position: absolute; left: 50%; top: 190px; transform: translateX(-50%); width: 560px; height: 380px;
+    background: var(--grafito); border: 18px solid #3B3C41; box-shadow: 0 20px 40px rgba(0,0,0,.18);
+    display: flex; flex-direction: column; justify-content: center; padding: 0 56px; color: var(--hueso); }
+  .cuadro b { font-size: 76px; line-height: 1; letter-spacing: -0.02em; }
+  .cuadro span { font-size: 28px; color: #C9C6BE; margin-top: 20px; }
+  .planta { position: absolute; bottom: 34px; width: 220px; }
+  .planta.izq { left: 110px; } .planta.der { right: 110px; }
+
+  /* ---------- Interfaz ---------- */
+  .ui { position: fixed; z-index: 10; }
+  .marca-ui { text-decoration: none; color: var(--grafito); top: calc(14px + env(safe-area-inset-top, 0px)); left: 16px; background: rgba(242,238,230,.94);
+    padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 17px; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  .btn-lista { top: calc(14px + env(safe-area-inset-top, 0px)); right: 16px; background: rgba(242,238,230,.94); border: 0;
+    padding: 9px 16px; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--grafito); box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  .demo { top: calc(62px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+    background: var(--cuero); color: #fff; border-radius: 14px; padding: 8px 8px 8px 14px; display: flex; align-items: center; gap: 10px;
+    font-size: 14px; line-height: 1.3; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+  .demo a { flex: none; background: var(--hueso); color: var(--grafito); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+  .pista { left: 50%; top: 42%; transform: translate(-50%,-50%); background: rgba(46,47,51,.88); color: var(--hueso);
+    padding: 14px 20px; border-radius: 16px; font-size: 16px; text-align: center; line-height: 1.4; pointer-events: none; transition: opacity .6s; max-width: 80vw; }
+  .pista.oculta { opacity: 0; }
+  .btn-carrito { left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    background: var(--grafito); color: var(--hueso); border: 0; border-radius: 999px; padding: 14px 24px 14px 20px;
+    display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+  .btn-carrito svg { width: 24px; height: 24px; }
+  .badge { position: absolute; top: -6px; right: -6px; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px;
+    background: var(--rojo); color: #fff; font-size: 14px; font-weight: 700; line-height: 26px; text-align: center;
+    border: 2px solid var(--hueso); display: none; }
+  .badge.visible { display: block; }
+  .badge.salto { animation: salto .4s; }
+  @keyframes salto { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  .aviso { left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(10px);
+    background: var(--hueso); color: var(--grafito); padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 500;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap; }
+  .aviso.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Capas (producto, carrito, lista) */
+  .capa { position: fixed; inset: 0; z-index: 20; background: rgba(20,21,24,.6); display: none; align-items: flex-end; justify-content: center; }
+  .capa.abierta { display: flex; }
+  .hoja { background: var(--hueso); width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; border-radius: 22px 22px 0 0;
+    padding: 22px 20px calc(22px + env(safe-area-inset-bottom, 0px)); animation: subir .28s ease-out; }
+  @media (min-width: 700px) { .capa { align-items: center; } .hoja { border-radius: 22px; } }
+  @keyframes subir { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .cerrar { float: right; background: var(--hueso-2); border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; line-height: 36px; color: var(--grafito); }
+  .producto-img { display: block; width: 72%; max-width: 280px; margin: 8px auto 0; }
+  .producto-nombre { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-top: 12px; }
+  .producto-desc { color: var(--texto-2); font-size: 15px; margin-top: 4px; }
+  .producto-precio { font-size: 30px; font-weight: 700; color: var(--cuero-osc); margin-top: 10px; }
+  .talles { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .talle { border: 2px solid var(--hueso-2); background: #fff; border-radius: 10px; min-width: 48px; height: 44px; font-size: 16px; font-weight: 500; color: var(--grafito); }
+  .talle.activo { border-color: var(--grafito); background: var(--grafito); color: var(--hueso); }
+  .btn-principal { width: 100%; margin-top: 18px; background: var(--grafito); color: var(--hueso); border: 0; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 500; }
+  .btn-wa { background: #1F7A4A; }
+  .btn-secundario { width: 100%; margin-top: 10px; background: transparent; color: var(--grafito); border: 2px solid var(--grafito); border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 500; }
+  h2.titulo-hoja { font-size: 24px; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .item { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--hueso-2); }
+  .item svg { width: 56px; height: 62px; }
+  .item-nombre { font-weight: 500; font-size: 16px; }
+  .item-sub { color: var(--texto-2); font-size: 14px; }
+  .item-controles { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .ctrl { width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--hueso-2); background: #fff; font-size: 20px; font-weight: 700; color: var(--grafito); line-height: 1; }
+  .cant { min-width: 28px; text-align: center; font-weight: 700; font-size: 17px; }
+  .quitar { margin-left: auto; background: none; border: 0; color: var(--cuero-osc); font-size: 14px; font-weight: 500; text-decoration: underline; }
+  .item-subtotal { font-weight: 700; font-size: 15px; margin-left: 6px; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--grafito); margin-top: 6px; padding-top: 14px; font-size: 18px; }
+  .total b { font-size: 26px; }
+  .vacio { color: var(--texto-2); padding: 18px 0 6px; }
+  .lista-item { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--hueso-2); }
+  .lista-item svg { width: 64px; height: 70px; }
+  .lista-item button { background: var(--grafito); color: var(--hueso); border: 0; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 500; }
+  button:focus-visible { outline: 3px solid var(--cuero); outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<div id="fuentes">
+    <!-- Pared del frente: logo -->
+    <div class="pared" data-pared="frente">
+      <div class="logo-pared">
+        <div class="toldo-barra"></div>
+        <div class="toldo" data-toldo="frente"></div>
+        <div class="nombre">qué facha</div>
+        <div class="lema">Tu comercio, vivo.</div>
+      </div>
+    </div>
+    <!-- Pared derecha: remeras -->
+    <div class="pared" data-pared="derecha">
+      <div class="barral"></div>
+      <div class="remeras"></div>
+    </div>
+    <!-- Pared izquierda: mostrador -->
+    <div class="pared" data-pared="izquierda">
+      <div class="toldo-mostrador"><div class="toldo-barra"></div><div class="toldo" data-toldo="mostrador"></div></div>
+      <button class="caja" aria-label="Caja: finalizar pedido por WhatsApp">
+        <span class="caja-texto">Pedí por WhatsApp</span>
+        <svg viewBox="0 0 260 190" width="260" height="190" aria-hidden="true">
+          <rect x="30" y="20" width="200" height="70" rx="10" fill="#2E2F33"/>
+          <rect x="50" y="36" width="160" height="38" rx="6" fill="#9DB89E"/>
+          <text x="130" y="63" text-anchor="middle" font-size="22" font-weight="700" fill="#2E2F33" font-family="system-ui, sans-serif">PEDIDO</text>
+          <path d="M20 100 H240 L250 170 H10 Z" fill="#3B3C41"/>
+          <g fill="#F2EEE6">
+            <rect x="46" y="112" width="28" height="14" rx="3"/><rect x="84" y="112" width="28" height="14" rx="3"/><rect x="122" y="112" width="28" height="14" rx="3"/>
+            <rect x="46" y="134" width="28" height="14" rx="3"/><rect x="84" y="134" width="28" height="14" rx="3"/><rect x="122" y="134" width="28" height="14" rx="3"/>
+          </g>
+          <rect x="166" y="112" width="56" height="36" rx="5" fill="#B0674A"/>
+          <rect x="0" y="170" width="260" height="20" rx="4" fill="#2E2F33"/>
+        </svg>
+        <span class="pulso" aria-hidden="true">$</span>
+      </button>
+      <div class="mostrador"><div class="tapa"></div><div class="frente"><span class="rotulo">Caja</span></div></div>
+    </div>
+    <!-- Pared trasera: cuadro y plantas -->
+    <div class="pared" data-pared="atras">
+      <div class="cuadro"><b>Hacete visible.</b><span>Presencia en Google y web para comercios de Durazno</span></div>
+      <svg class="planta izq" viewBox="0 0 220 360" aria-hidden="true"><use href="#planta"/></svg>
+      <svg class="planta der" viewBox="0 0 220 360" aria-hidden="true"><use href="#planta"/></svg>
+    </div>
+</div>
+
+<div id="stage" aria-label="Recorrido 360 de la tienda. Arrastrá para mirar alrededor.">
+  <div id="scene" aria-hidden="true">
+    <div id="paredes"></div>
+    <div id="baldosas"></div>
+  </div>
+</div>
+
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <g id="planta">
+      <g fill="#6F7F55">
+        <ellipse cx="110" cy="90" rx="34" ry="70"/>
+        <ellipse cx="62" cy="130" rx="28" ry="62" transform="rotate(-28 62 130)"/>
+        <ellipse cx="158" cy="130" rx="28" ry="62" transform="rotate(28 158 130)"/>
+      </g>
+      <g fill="#5A6945">
+        <ellipse cx="84" cy="170" rx="22" ry="50" transform="rotate(-40 84 170)"/>
+        <ellipse cx="136" cy="170" rx="22" ry="50" transform="rotate(40 136 170)"/>
+      </g>
+      <path d="M55 220 H165 L150 360 H70 Z" fill="#B0674A"/>
+      <rect x="48" y="210" width="124" height="22" rx="6" fill="#8F4F37"/>
+    </g>
+  </defs>
+</svg>
+
+<!-- Interfaz fija -->
+<a class="ui marca-ui" href="../" aria-label="Volver a la web de Qué Facha">← qué facha</a>
+<button class="ui btn-lista" id="btnLista">Ver como lista</button>
+<div class="ui demo">
+  <span>Tienda de demostración: así podría verse la tuya.</span>
+  <a id="btnQuieroMia" target="_blank" rel="noopener">Quiero la mía</a>
+</div>
+<div class="ui pista" id="pista">Arrastrá para mirar alrededor.<br>Tocá las remeras para verlas.</div>
+<button class="ui btn-carrito" id="btnCarrito" aria-label="Abrir carrito">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/>
+  </svg>
+  Carrito
+  <span class="badge" id="badge">0</span>
+</button>
+<div class="ui aviso" id="aviso"></div>
+
+<!-- Capa: producto -->
+<div class="capa" id="capaProducto" role="dialog" aria-modal="true" aria-labelledby="prodNombre">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <div id="prodImg"></div>
+    <div class="producto-nombre" id="prodNombre"></div>
+    <div class="producto-desc" id="prodDesc"></div>
+    <div class="producto-precio" id="prodPrecio"></div>
+    <div class="talles" id="prodTalles" role="group" aria-label="Talle"></div>
+    <button class="btn-principal" id="btnAgregar">Agregar al carrito</button>
+  </div>
+</div>
+
+<!-- Capa: carrito -->
+<div class="capa" id="capaCarrito" role="dialog" aria-modal="true" aria-labelledby="tituloCarrito">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <h2 class="titulo-hoja" id="tituloCarrito">Tu carrito</h2>
+    <div id="listaCarrito"></div>
+    <div class="total" id="totalCarrito"><span>Total</span><b>$0</b></div>
+    <button class="btn-principal btn-wa" id="btnFinalizar">Finalizar compra en WhatsApp</button>
+    <button class="btn-secundario" data-cerrar>Seguir comprando</button>
+  </div>
+</div>
+
+<!-- Capa: lista -->
+<div class="capa" id="capaLista" role="dialog" aria-modal="true" aria-labelledby="tituloLista">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <h2 class="titulo-hoja" id="tituloLista">Productos</h2>
+    <div id="listaProductos"></div>
+  </div>
+</div>
+
+<script>
+/* =========================================================
+   CONFIGURACIÓN DE LA TIENDA
+   Para otra tienda, se cambia solo este bloque.
+   ========================================================= */
+const TIENDA = {
+  nombre: 'Qué Facha',
+  whatsapp: '59891782945',
+  demo: true, // en la tienda de un cliente real: false (y borrar la franja .demo)
+  moneda: '$',
+  talles: ['S', 'M', 'L', 'XL'],
+  productos: [
+    { id: 'terracota', nombre: 'Remera Terracota', desc: 'Algodón. Logo con toldo hueso y grafito.', precio: 790,
+      tela: '#B0674A', franjas: ['#F2EEE6', '#2E2F33'], texto: '#F2EEE6' },
+    { id: 'grafito', nombre: 'Remera Grafito', desc: 'Algodón. Logo con toldo hueso y terracota.', precio: 790,
+      tela: '#2E2F33', franjas: ['#F2EEE6', '#B0674A'], texto: '#F2EEE6' },
+    { id: 'hueso', nombre: 'Remera Hueso', desc: 'Algodón. Logo con toldo terracota y grafito.', precio: 790,
+      tela: '#EDE8DE', franjas: ['#B0674A', '#2E2F33'], texto: '#2E2F33' }
+  ]
+};
+
+/* ---------- Dibujo de remeras (SVG) ---------- */
+function remeraSVG(p, conPercha) {
+  const f = p.franjas;
+  let franjas = '';
+  for (let i = 0; i < 5; i++) {
+    const x = 70 + i * 12;
+    franjas += `<path d="M${x} 78 h12 v12 a6 6 0 0 1 -12 0 z" fill="${f[i % 2]}"/>`;
+  }
+  const borde = p.tela === '#EDE8DE' ? 'stroke="#D6CFC2" stroke-width="2"' : '';
+  const percha = conPercha ? `<path d="M100 2 q8 0 8 8 q0 6 -8 8 v6 M60 38 L100 24 L140 38" fill="none" stroke="#2E2F33" stroke-width="4" stroke-linecap="round"/>` : '';
+  return `<svg viewBox="0 ${conPercha ? 0 : 20} 200 ${conPercha ? 230 : 210}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    ${percha}
+    <path d="M62 30 L22 50 L2 96 L34 110 L44 88 L44 226 L156 226 L156 88 L166 110 L198 96 L178 50 L138 30 Q100 58 62 30 Z" fill="${p.tela}" ${borde}/>
+    <path d="M62 30 Q100 58 138 30" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="4"/>
+    <rect x="70" y="74" width="60" height="4" fill="${p.texto === '#2E2F33' ? '#2E2F33' : '#F2EEE6'}"/>
+    ${franjas}
+    <text x="100" y="118" text-anchor="middle" font-size="17" font-weight="700" fill="${p.texto}" font-family="Bricolage Grotesque, system-ui, sans-serif">qué facha</text>
+  </svg>`;
+}
+
+/* ---------- Construcción de la sala ---------- */
+const ANCHO = 1400, FONDO = 1400, ALTO = 900;
+/* Piso y techo en baldosas chicas: así el navegador no descarta
+   una cara gigante cuando queda en parte detrás de la cámara. */
+(function () {
+  const N = 14, t = ANCHO / N, cont = document.getElementById('baldosas');
+  let html = '';
+  for (let i = 0; i < N; i++) for (let j = 0; j < N; j++) {
+    const x = -ANCHO / 2 + t * (i + 0.5), z = -FONDO / 2 + t * (j + 0.5);
+    const estilo = `width:${t + 2}px;height:${t + 2}px;margin-left:${-(t + 2) / 2}px;margin-top:${-(t + 2) / 2}px;`;
+    const bp = `background-position:${-i * t}px ${-j * t}px;background-size:${ANCHO}px ${FONDO}px;`;
+    html += `<div class="cara piso" style="${estilo}${bp}transform:translate3d(${x}px,${ALTO / 2}px,${z}px) rotateX(90deg)"></div>`;
+    html += `<div class="cara techo" style="${estilo}${bp}transform:translate3d(${x}px,${-ALTO / 2}px,${z}px) rotateX(-90deg)"></div>`;
+  }
+  cont.innerHTML = html;
+  cont.style.transformStyle = 'preserve-3d';
+})();
+
+function llenarToldo(id, n, colores) {
+  document.querySelector(id).innerHTML = Array.from({ length: n }, (_, i) =>
+    `<span style="background:${colores[i % 2]}"></span>`).join('');
+}
+llenarToldo('[data-toldo="frente"]', 9, ['#B0674A', '#2E2F33']);
+llenarToldo('[data-toldo="mostrador"]', 10, ['#B0674A', '#E2DBCF']);
+
+const contRemeras = document.querySelector('#fuentes .remeras');
+TIENDA.productos.forEach(p => {
+  const b = document.createElement('button');
+  b.className = 'remera'; b.dataset.id = p.id; b.tabIndex = -1;
+  b.setAttribute('aria-label', `Ver ${p.nombre}`);
+  b.innerHTML = remeraSVG(p, true) + `<span class="pulso" aria-hidden="true">+</span>
+    <span class="etiqueta">${p.nombre.replace('Remera ', '')}<small>${precio(p.precio)}</small></span>`;
+  contRemeras.appendChild(b);
+});
+
+/* Paredes en franjas angostas (mismo motivo que las baldosas).
+   Cada franja muestra su porción de la pared completa. */
+(function () {
+  const N = 14, cont = document.getElementById('paredes');
+  const defs = [
+    ['frente', ANCHO, `translateZ(${-FONDO / 2}px)`],
+    ['atras', ANCHO, `rotateY(180deg) translateZ(${-FONDO / 2}px)`],
+    ['izquierda', FONDO, `rotateY(90deg) translateZ(${-ANCHO / 2}px)`],
+    ['derecha', FONDO, `rotateY(-90deg) translateZ(${-ANCHO / 2}px)`]
+  ];
+  defs.forEach(([nombre, w, base]) => {
+    const fuente = document.querySelector(`#fuentes [data-pared="${nombre}"]`);
+    fuente.style.width = w + 'px'; fuente.style.height = ALTO + 'px';
+    const t = w / N;
+    for (let i = 0; i < N; i++) {
+      const f = document.createElement('div');
+      f.className = 'cara';
+      f.style.cssText = `width:${t + 2}px;height:${ALTO + 2}px;margin-left:${-(t + 2) / 2}px;margin-top:${-(ALTO + 2) / 2}px;` +
+        `transform:${base} translateX(${-w / 2 + t * (i + 0.5)}px)`;
+      const copia = fuente.cloneNode(true);
+      copia.style.width = w + 'px'; copia.style.height = (ALTO + 2) + 'px'; copia.style.left = (-i * t + 1) + 'px';
+      f.appendChild(copia); cont.appendChild(f);
+    }
+  });
+})();
+
+/* ---------- Detección de clics en la sala ----------
+   Se traza un rayo desde la cámara, se calcula en qué pared cae
+   y en qué punto (u, v), y se busca el objeto en esa posición. */
+function rayo(cx, cy) {
+  let dx = cx - innerWidth / 2, dy = cy - innerHeight / 2, dz = -persp;
+  const p = pitch * Math.PI / 180, y = yaw * Math.PI / 180;
+  const y1 = dy * Math.cos(p) + dz * Math.sin(p), z1 = -dy * Math.sin(p) + dz * Math.cos(p);
+  const X = dx * Math.cos(y) - z1 * Math.sin(y), Z = dx * Math.sin(y) + z1 * Math.cos(y), Y = y1;
+  const tx = X ? (ANCHO / 2) / Math.abs(X) : Infinity, ty = Y ? (ALTO / 2) / Math.abs(Y) : Infinity, tz = Z ? (FONDO / 2) / Math.abs(Z) : Infinity;
+  const t = Math.min(tx, ty, tz);
+  const hx = X * t, hy = Y * t, hz = Z * t, v = hy + ALTO / 2;
+  if (t === ty) return null;
+  if (t === tz) return Z < 0 ? { pared: 'frente', u: hx + ANCHO / 2, v } : { pared: 'atras', u: -hx + ANCHO / 2, v };
+  return X > 0 ? { pared: 'derecha', u: hz + FONDO / 2, v } : { pared: 'izquierda', u: -hz + FONDO / 2, v };
+}
+function objetoEn(cx, cy) {
+  const h = rayo(cx, cy); if (!h) return null;
+  const fuente = document.querySelector(`#fuentes [data-pared="${h.pared}"]`);
+  const base = fuente.getBoundingClientRect();
+  for (const el of fuente.querySelectorAll('.remera, .caja')) {
+    const r = el.getBoundingClientRect(), x = r.left - base.left, y = r.top - base.top;
+    if (h.u >= x && h.u <= x + r.width && h.v >= y && h.v <= y + r.height) return el;
+  }
+  return null;
+}
+
+/* ---------- Cámara y arrastre ---------- */
+const stage = document.getElementById('stage'), scene = document.getElementById('scene');
+let yaw = 0, pitch = 0, persp = 600, fueArrastre = false;
+function ajustarPerspectiva() {
+  const w = innerWidth, h = innerHeight;
+  persp = Math.max((w / 2) / Math.tan(32.5 * Math.PI / 180), (h / 2) / Math.tan(45 * Math.PI / 180));
+  stage.style.perspective = persp + 'px';
+  render();
+}
+function render() {
+  scene.style.transform = `translateZ(${persp}px) rotateX(${pitch}deg) rotateY(${yaw}deg)`;
+}
+addEventListener('resize', ajustarPerspectiva);
+ajustarPerspectiva();
+
+let arrastrando = false, x0 = 0, y0 = 0, movido = 0;
+const pista = document.getElementById('pista');
+stage.addEventListener('pointerdown', e => {
+  arrastrando = true; x0 = e.clientX; y0 = e.clientY; movido = 0; fueArrastre = false;
+  stage.classList.add('arrastrando');
+});
+addEventListener('pointermove', e => {
+  if (!arrastrando) return;
+  stage.classList.remove('sobre-objeto');
+  const dx = e.clientX - x0, dy = e.clientY - y0;
+  x0 = e.clientX; y0 = e.clientY;
+  movido += Math.abs(dx) + Math.abs(dy);
+  if (movido > 8) { fueArrastre = true; pista.classList.add('oculta'); }
+  const k = 60 / persp;
+  yaw -= dx * k;
+  pitch = Math.max(-45, Math.min(45, pitch + dy * k));
+  render();
+});
+addEventListener('pointerup', e => {
+  if (!arrastrando) return;
+  arrastrando = false; stage.classList.remove('arrastrando');
+  if (!fueArrastre) {
+    const obj = objetoEn(e.clientX, e.clientY);
+    if (obj && obj.classList.contains('remera')) abrirProducto(obj.dataset.id);
+    else if (obj && obj.classList.contains('caja')) clickCaja();
+  }
+  fueArrastre = false;
+});
+stage.addEventListener('pointermove', e => {
+  if (arrastrando || e.pointerType !== 'mouse') return;
+  stage.classList.toggle('sobre-objeto', !!objetoEn(e.clientX, e.clientY));
+});
+addEventListener('pointercancel', () => { arrastrando = false; stage.classList.remove('arrastrando'); });
+addEventListener('keydown', e => {
+  if (document.querySelector('.capa.abierta')) return;
+  const paso = { ArrowLeft: [4, 0], ArrowRight: [-4, 0], ArrowUp: [0, 3], ArrowDown: [0, -3] }[e.key];
+  if (!paso) return;
+  yaw += paso[0]; pitch = Math.max(-45, Math.min(45, pitch + paso[1])); render();
+});
+setTimeout(() => pista.classList.add('oculta'), 6000);
+
+/* ---------- Carrito ---------- */
+let carrito = []; // { id, talle, cant }
+let seleccion = { id: null, talle: 'M' };
+function precio(n) { return TIENDA.moneda + n.toLocaleString('es-UY'); }
+function prod(id) { return TIENDA.productos.find(p => p.id === id); }
+const $ = id => document.getElementById(id);
+
+function abrirCapa(id) { $(id).classList.add('abierta'); }
+function cerrarCapas() { document.querySelectorAll('.capa').forEach(c => c.classList.remove('abierta')); }
+document.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', cerrarCapas));
+document.querySelectorAll('.capa').forEach(c => c.addEventListener('click', e => { if (e.target === c) cerrarCapas(); }));
+addEventListener('keydown', e => { if (e.key === 'Escape') cerrarCapas(); });
+
+function abrirProducto(id) {
+  const p = prod(id); seleccion.id = id;
+  $('prodImg').innerHTML = remeraSVG(p, false).replace('<svg', '<svg class="producto-img"');
+  $('prodNombre').textContent = p.nombre;
+  $('prodDesc').textContent = p.desc;
+  $('prodPrecio').textContent = precio(p.precio);
+  $('prodTalles').innerHTML = TIENDA.talles.map(t =>
+    `<button class="talle${t === seleccion.talle ? ' activo' : ''}" data-talle="${t}" aria-pressed="${t === seleccion.talle}">${t}</button>`).join('');
+  $('prodTalles').querySelectorAll('.talle').forEach(b => b.addEventListener('click', () => {
+    seleccion.talle = b.dataset.talle;
+    $('prodTalles').querySelectorAll('.talle').forEach(x => { x.classList.toggle('activo', x === b); x.setAttribute('aria-pressed', x === b); });
+  }));
+  cerrarCapas(); abrirCapa('capaProducto');
+}
+
+$('btnAgregar').addEventListener('click', () => {
+  const ex = carrito.find(i => i.id === seleccion.id && i.talle === seleccion.talle);
+  if (ex) ex.cant++; else carrito.push({ id: seleccion.id, talle: seleccion.talle, cant: 1 });
+  cerrarCapas(); actualizar(true);
+  avisar(`${prod(seleccion.id).nombre} (${seleccion.talle}) agregada`);
+});
+
+function avisar(t) {
+  const a = $('aviso'); a.textContent = t; a.classList.add('visible');
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => a.classList.remove('visible'), 1800);
+}
+
+function totalItems() { return carrito.reduce((s, i) => s + i.cant, 0); }
+function totalPesos() { return carrito.reduce((s, i) => s + i.cant * prod(i.id).precio, 0); }
+
+function actualizar(salto) {
+  const b = $('badge'), n = totalItems();
+  b.textContent = n; b.classList.toggle('visible', n > 0);
+  if (salto) { b.classList.remove('salto'); void b.offsetWidth; b.classList.add('salto'); }
+  $('btnCarrito').setAttribute('aria-label', `Abrir carrito, ${n} artículo${n === 1 ? '' : 's'}`);
+  const lista = $('listaCarrito');
+  if (!carrito.length) {
+    lista.innerHTML = '<p class="vacio">Tu carrito está vacío. Tocá una remera para agregarla.</p>';
+  } else {
+    lista.innerHTML = carrito.map((i, k) => {
+      const p = prod(i.id);
+      return `<div class="item">
+        ${remeraSVG(p, false)}
+        <div>
+          <div class="item-nombre">${p.nombre}</div>
+          <div class="item-sub">Talle ${i.talle} · ${precio(p.precio)} c/u</div>
+          <div class="item-controles">
+            <button class="ctrl" data-accion="menos" data-k="${k}" aria-label="Restar uno">−</button>
+            <span class="cant">${i.cant}</span>
+            <button class="ctrl" data-accion="mas" data-k="${k}" aria-label="Sumar uno">+</button>
+            <span class="item-subtotal">${precio(i.cant * p.precio)}</span>
+            <button class="quitar" data-accion="quitar" data-k="${k}">Quitar</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  $('totalCarrito').querySelector('b').textContent = precio(totalPesos());
+  $('btnFinalizar').disabled = !carrito.length;
+  $('btnFinalizar').style.opacity = carrito.length ? 1 : .5;
+}
+
+$('listaCarrito').addEventListener('click', e => {
+  const b = e.target.closest('[data-accion]'); if (!b) return;
+  const i = carrito[+b.dataset.k];
+  if (b.dataset.accion === 'mas') i.cant++;
+  if (b.dataset.accion === 'menos') i.cant--;
+  if (b.dataset.accion === 'quitar' || i.cant <= 0) carrito.splice(+b.dataset.k, 1);
+  actualizar(false);
+});
+
+function mensajePedido() {
+  const lineas = carrito.map(i => {
+    const p = prod(i.id);
+    return `• ${i.cant} × ${p.nombre} (talle ${i.talle}) — ${precio(i.cant * p.precio)}`;
+  });
+  return `${TIENDA.demo ? '(Pedido de prueba desde la tienda demo)\n\n' : ''}Hola ${TIENDA.nombre}, quiero hacer este pedido:\n\n${lineas.join('\n')}\n\nTotal: ${precio(totalPesos())}`;
+}
+function irAWhatsApp() {
+  if (!carrito.length) { avisar('Tu carrito está vacío'); return; }
+  window.open(`https://wa.me/${TIENDA.whatsapp}?text=${encodeURIComponent(mensajePedido())}`, '_blank', 'noopener');
+}
+
+$('btnCarrito').addEventListener('click', () => { actualizar(false); abrirCapa('capaCarrito'); });
+$('btnFinalizar').addEventListener('click', irAWhatsApp);
+function clickCaja() {
+  if (!carrito.length) { avisar('Primero elegí una remera'); return; }
+  irAWhatsApp();
+}
+
+/* Vista de lista */
+$('listaProductos').innerHTML = TIENDA.productos.map(p => `<div class="lista-item">
+  ${remeraSVG(p, false)}
+  <div><div class="item-nombre">${p.nombre}</div><div class="item-sub">${precio(p.precio)}</div></div>
+  <button data-ver="${p.id}">Ver</button></div>`).join('');
+$('listaProductos').addEventListener('click', e => { const b = e.target.closest('[data-ver]'); if (b) abrirProducto(b.dataset.ver); });
+$('btnLista').addEventListener('click', () => abrirCapa('capaLista'));
+
+$('btnQuieroMia').href = `https://wa.me/${TIENDA.whatsapp}?text=${encodeURIComponent('Hola, vi la tienda 360 de demostración y quiero una para mi emprendimiento.')}`;
+
+actualizar(false);
+</script>
+</body>
+</html>
