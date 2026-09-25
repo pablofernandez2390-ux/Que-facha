@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Tienda 3D de demostración — Qué Facha</title>
+<meta name="description" content="Caminá por una tienda 3D: acercate a los productos, armá tu carrito y hacé el pedido por WhatsApp. Demo de Qué Facha, Durazno.">
+<!-- Vista previa al compartir (WhatsApp, Facebook, etc.) -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="Caminá por la tienda 3D de Qué Facha">
+<meta property="og:description" content="Movete con el pad, acercate a los productos y pedí por WhatsApp. Así podría verse tu tienda.">
+<meta property="og:image" content="https://pablofernandez2390-ux.github.io/Que-facha/tienda3d/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://pablofernandez2390-ux.github.io/Que-facha/tienda3d/">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="theme-color" content="#2E2F33">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%232E2F33'/%3E%3Cg fill='%23F2EEE6'%3E%3Cpath d='M8 16h12v18a6 6 0 0 1-12 0z'/%3E%3Cpath d='M32 16h12v18a6 6 0 0 1-12 0z'/%3E%3C/g%3E%3Cg fill='%23B0674A'%3E%3Cpath d='M20 16h12v18a6 6 0 0 1-12 0z'/%3E%3Cpath d='M44 16h12v18a6 6 0 0 1-12 0z'/%3E%3C/g%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --grafito: #2E2F33; --hueso: #F2EEE6; --hueso-2: #E2DBCF; --cuero: #B0674A;
+    --cuero-osc: #8F4F37; --piedra: #8A8780; --texto-2: #58595E; --rojo: #D93A2F;
+    --fuente: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; background: var(--hueso); font-family: var(--fuente); color: var(--grafito); -webkit-user-select: none; user-select: none; }
+  button { font-family: inherit; cursor: pointer; }
+  #lienzo { position: fixed; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+/* ---------- Interfaz ---------- */
+  .ui { position: fixed; z-index: 10; }
+  .marca-ui { text-decoration: none; color: var(--grafito); top: calc(14px + env(safe-area-inset-top, 0px)); left: 16px; background: rgba(242,238,230,.94);
+    padding: 8px 14px; border-radius: 999px; font-weight: 700; font-size: 17px; box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  .btn-lista { top: calc(14px + env(safe-area-inset-top, 0px)); right: 16px; background: rgba(242,238,230,.94); border: 0;
+    padding: 9px 16px; border-radius: 999px; font-size: 15px; font-weight: 500; color: var(--grafito); box-shadow: 0 4px 14px rgba(0,0,0,.2); }
+  .demo { top: calc(62px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); width: max-content; max-width: calc(100vw - 32px);
+    background: var(--cuero); color: #fff; border-radius: 14px; padding: 8px 8px 8px 14px; display: flex; align-items: center; gap: 10px;
+    font-size: 14px; line-height: 1.3; box-shadow: 0 4px 14px rgba(0,0,0,.25); }
+  .demo a { flex: none; background: var(--hueso); color: var(--grafito); text-decoration: none; font-weight: 700; border-radius: 10px; padding: 8px 12px; font-size: 14px; }
+  .pista { left: 50%; top: 42%; transform: translate(-50%,-50%); background: rgba(46,47,51,.88); color: var(--hueso);
+    padding: 14px 20px; border-radius: 16px; font-size: 16px; text-align: center; line-height: 1.4; pointer-events: none; transition: opacity .6s; max-width: 80vw; }
+  .pista.oculta { opacity: 0; }
+  .btn-carrito { left: 50%; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%);
+    background: var(--grafito); color: var(--hueso); border: 0; border-radius: 999px; padding: 14px 24px 14px 20px;
+    display: flex; align-items: center; gap: 10px; font-size: 17px; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+  .btn-carrito svg { width: 24px; height: 24px; }
+  .badge { position: absolute; top: -6px; right: -6px; min-width: 26px; height: 26px; padding: 0 7px; border-radius: 13px;
+    background: var(--rojo); color: #fff; font-size: 14px; font-weight: 700; line-height: 26px; text-align: center;
+    border: 2px solid var(--hueso); display: none; }
+  .badge.visible { display: block; }
+  .badge.salto { animation: salto .4s; }
+  @keyframes salto { 0% { transform: scale(1); } 40% { transform: scale(1.35); } 100% { transform: scale(1); } }
+  .aviso { left: 50%; bottom: calc(92px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(10px);
+    background: var(--hueso); color: var(--grafito); padding: 10px 18px; border-radius: 999px; font-size: 15px; font-weight: 500;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: opacity .25s, transform .25s; white-space: nowrap; }
+  .aviso.visible { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* Capas (producto, carrito, lista) */
+  .capa { position: fixed; inset: 0; z-index: 20; background: rgba(20,21,24,.6); display: none; align-items: flex-end; justify-content: center; }
+  .capa.abierta { display: flex; }
+  .hoja { background: var(--hueso); width: 100%; max-width: 480px; max-height: 88vh; overflow-y: auto; border-radius: 22px 22px 0 0;
+    padding: 22px 20px calc(22px + env(safe-area-inset-bottom, 0px)); animation: subir .28s ease-out; }
+  @media (min-width: 700px) { .capa { align-items: center; } .hoja { border-radius: 22px; } }
+  @keyframes subir { from { transform: translateY(40px); opacity: 0; } to { transform: none; opacity: 1; } }
+  .cerrar { float: right; background: var(--hueso-2); border: 0; width: 36px; height: 36px; border-radius: 50%; font-size: 20px; line-height: 36px; color: var(--grafito); }
+  .producto-img { display: block; width: 72%; max-width: 280px; margin: 8px auto 0; }
+  .producto-nombre { font-size: 26px; font-weight: 700; letter-spacing: -0.02em; margin-top: 12px; }
+  .producto-desc { color: var(--texto-2); font-size: 15px; margin-top: 4px; }
+  .producto-precio { font-size: 30px; font-weight: 700; color: var(--cuero-osc); margin-top: 10px; }
+  .talles { display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap; }
+  .talle { border: 2px solid var(--hueso-2); background: #fff; border-radius: 10px; min-width: 48px; height: 44px; font-size: 16px; font-weight: 500; color: var(--grafito); }
+  .talle.activo { border-color: var(--grafito); background: var(--grafito); color: var(--hueso); }
+  .btn-principal { width: 100%; margin-top: 18px; background: var(--grafito); color: var(--hueso); border: 0; border-radius: 14px; padding: 16px; font-size: 17px; font-weight: 500; }
+  .btn-wa { background: #1F7A4A; }
+  .btn-secundario { width: 100%; margin-top: 10px; background: transparent; color: var(--grafito); border: 2px solid var(--grafito); border-radius: 14px; padding: 14px; font-size: 16px; font-weight: 500; }
+  h2.titulo-hoja { font-size: 24px; letter-spacing: -0.02em; margin-bottom: 14px; }
+  .item { display: grid; grid-template-columns: 56px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--hueso-2); }
+  .item svg { width: 56px; height: 62px; }
+  .item-nombre { font-weight: 500; font-size: 16px; }
+  .item-sub { color: var(--texto-2); font-size: 14px; }
+  .item-controles { display: flex; align-items: center; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+  .ctrl { width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--hueso-2); background: #fff; font-size: 20px; font-weight: 700; color: var(--grafito); line-height: 1; }
+  .cant { min-width: 28px; text-align: center; font-weight: 700; font-size: 17px; }
+  .quitar { margin-left: auto; background: none; border: 0; color: var(--cuero-osc); font-size: 14px; font-weight: 500; text-decoration: underline; }
+  .item-subtotal { font-weight: 700; font-size: 15px; margin-left: 6px; }
+  .total { display: flex; justify-content: space-between; align-items: baseline; border-top: 2px solid var(--grafito); margin-top: 6px; padding-top: 14px; font-size: 18px; }
+  .total b { font-size: 26px; }
+  .vacio { color: var(--texto-2); padding: 18px 0 6px; }
+  .lista-item { display: grid; grid-template-columns: 64px 1fr auto; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--hueso-2); }
+  .lista-item svg { width: 64px; height: 70px; }
+  .lista-item button { background: var(--grafito); color: var(--hueso); border: 0; border-radius: 10px; padding: 10px 14px; font-size: 14px; font-weight: 500; }
+  button:focus-visible { outline: 3px solid var(--cuero); outline-offset: 2px; }
+
+  /* ---------- Controles 3D ---------- */
+  .btn-carrito { left: auto; right: 16px; transform: none; }
+  .joy { left: calc(20px + env(safe-area-inset-left, 0px)); bottom: calc(24px + env(safe-area-inset-bottom, 0px)); width: 128px; height: 128px; border-radius: 50%;
+    background: rgba(46,47,51,.28); border: 2px solid rgba(242,238,230,.7); touch-action: none; }
+  .perilla { position: absolute; left: 50%; top: 50%; width: 56px; height: 56px; border-radius: 50%; background: var(--grafito);
+    border: 3px solid var(--hueso); transform: translate(-50%,-50%); box-shadow: 0 4px 12px rgba(0,0,0,.3); pointer-events: none; }
+  .mira { left: 50%; top: 50%; width: 10px; height: 10px; margin: -5px 0 0 -5px; border-radius: 50%; background: rgba(46,47,51,.55);
+    border: 2px solid rgba(242,238,230,.9); pointer-events: none; transition: transform .2s, background .2s; }
+  .mira.activa { background: var(--cuero); transform: scale(1.6); }
+  .btn-interactuar { left: 50%; bottom: calc(170px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(8px);
+    background: var(--cuero); color: #fff; border: 0; border-radius: 999px; padding: 13px 22px; font-size: 16px; font-weight: 500;
+    box-shadow: 0 6px 18px rgba(0,0,0,.3); opacity: 0; pointer-events: none; transition: opacity .2s, transform .2s; white-space: nowrap; }
+  .btn-interactuar.visible { opacity: 1; pointer-events: auto; transform: translateX(-50%) translateY(0); }
+  .cargando { inset: 0; background: var(--grafito); color: var(--hueso); display: flex; align-items: center; justify-content: center; font-size: 18px; z-index: 30; transition: opacity .5s; }
+  .cargando.oculta { opacity: 0; pointer-events: none; }
+  .aviso { bottom: calc(100px + env(safe-area-inset-bottom, 0px)); }
+  @media (min-width: 900px) { .joy { display: none; } }
+</style>
+</head>
+<body>
+<canvas id="lienzo" aria-label="Tienda 3D. Usá el pad para moverte y arrastrá para mirar."></canvas>
+
+<a class="ui marca-ui" href="../" aria-label="Volver a la web de Qué Facha">← qué facha</a>
+<button class="ui btn-lista" id="btnLista">Ver como lista</button>
+<div class="ui demo">
+  <span>Tienda de demostración: así podría verse la tuya.</span>
+  <a id="btnQuieroMia" target="_blank" rel="noopener">Quiero la mía</a>
+</div>
+<div class="ui pista" id="pista">Movete con el pad y arrastrá para mirar.<br>Acercate a las remeras para verlas.</div>
+<div class="ui mira" id="mira"></div>
+<button class="ui btn-interactuar" id="btnInteractuar">Ver</button>
+<div class="ui joy" id="joy" aria-hidden="true"><div class="perilla" id="perilla"></div></div>
+<button class="ui btn-carrito" id="btnCarrito" aria-label="Abrir carrito">
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 2H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/>
+  </svg>
+  Carrito
+  <span class="badge" id="badge">0</span>
+</button>
+<div class="ui aviso" id="aviso"></div>
+<div class="ui cargando" id="cargando">Abriendo la tienda…</div>
+
+<!-- Capa: producto -->
+<div class="capa" id="capaProducto" role="dialog" aria-modal="true" aria-labelledby="prodNombre">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <div id="prodImg"></div>
+    <div class="producto-nombre" id="prodNombre"></div>
+    <div class="producto-desc" id="prodDesc"></div>
+    <div class="producto-precio" id="prodPrecio"></div>
+    <div class="talles" id="prodTalles" role="group" aria-label="Talle"></div>
+    <button class="btn-principal" id="btnAgregar">Agregar al carrito</button>
+  </div>
+</div>
+
+<!-- Capa: carrito -->
+<div class="capa" id="capaCarrito" role="dialog" aria-modal="true" aria-labelledby="tituloCarrito">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <h2 class="titulo-hoja" id="tituloCarrito">Tu carrito</h2>
+    <div id="listaCarrito"></div>
+    <div class="total" id="totalCarrito"><span>Total</span><b>$0</b></div>
+    <button class="btn-principal btn-wa" id="btnFinalizar">Finalizar compra en WhatsApp</button>
+    <button class="btn-secundario" data-cerrar>Seguir comprando</button>
+  </div>
+</div>
+
+<!-- Capa: lista -->
+<div class="capa" id="capaLista" role="dialog" aria-modal="true" aria-labelledby="tituloLista">
+  <div class="hoja">
+    <button class="cerrar" data-cerrar aria-label="Cerrar">×</button>
+    <h2 class="titulo-hoja" id="tituloLista">Productos</h2>
+    <div id="listaProductos"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* =========================================================
+   CONFIGURACIÓN DE LA TIENDA (igual que en la tienda 360)
+   ========================================================= */
+const TIENDA = {
+  nombre: 'Qué Facha',
+  whatsapp: '59891782945',
+  demo: true, // en la tienda de un cliente real: false (y borrar la franja .demo)
+  moneda: '$',
+  talles: ['S', 'M', 'L', 'XL'],
+  productos: [
+    { id: 'terracota', nombre: 'Remera Terracota', desc: 'Algodón. Logo con toldo hueso y grafito.', precio: 790,
+      tela: '#B0674A', franjas: ['#F2EEE6', '#2E2F33'], texto: '#F2EEE6' },
+    { id: 'grafito', nombre: 'Remera Grafito', desc: 'Algodón. Logo con toldo hueso y terracota.', precio: 790,
+      tela: '#2E2F33', franjas: ['#F2EEE6', '#B0674A'], texto: '#F2EEE6' },
+    { id: 'hueso', nombre: 'Remera Hueso', desc: 'Algodón. Logo con toldo terracota y grafito.', precio: 790,
+      tela: '#EDE8DE', franjas: ['#B0674A', '#2E2F33'], texto: '#2E2F33' }
+  ]
+};
+
+/* ---------- Dibujo de remeras (SVG) ---------- */
+function remeraSVG(p, conPercha) {
+  const f = p.franjas;
+  let franjas = '';
+  for (let i = 0; i < 5; i++) {
+    const x = 70 + i * 12;
+    franjas += `<path d="M${x} 78 h12 v12 a6 6 0 0 1 -12 0 z" fill="${f[i % 2]}"/>`;
+  }
+  const borde = p.tela === '#EDE8DE' ? 'stroke="#D6CFC2" stroke-width="2"' : '';
+  const percha = conPercha ? `<path d="M100 2 q8 0 8 8 q0 6 -8 8 v6 M60 38 L100 24 L140 38" fill="none" stroke="#2E2F33" stroke-width="4" stroke-linecap="round"/>` : '';
+  return `<svg viewBox="0 ${conPercha ? 0 : 20} 200 ${conPercha ? 230 : 210}" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    ${percha}
+    <path d="M62 30 L22 50 L2 96 L34 110 L44 88 L44 226 L156 226 L156 88 L166 110 L198 96 L178 50 L138 30 Q100 58 62 30 Z" fill="${p.tela}" ${borde}/>
+    <path d="M62 30 Q100 58 138 30" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="4"/>
+    <rect x="70" y="74" width="60" height="4" fill="${p.texto === '#2E2F33' ? '#2E2F33' : '#F2EEE6'}"/>
+    ${franjas}
+    <text x="100" y="118" text-anchor="middle" font-size="17" font-weight="700" fill="${p.texto}" font-family="Bricolage Grotesque, system-ui, sans-serif">qué facha</text>
+  </svg>`;
+}
+
+
+/* ---------- Carrito ---------- */
+let carrito = []; // { id, talle, cant }
+let seleccion = { id: null, talle: 'M' };
+function precio(n) { return TIENDA.moneda + n.toLocaleString('es-UY'); }
+function prod(id) { return TIENDA.productos.find(p => p.id === id); }
+const $ = id => document.getElementById(id);
+
+function abrirCapa(id) { $(id).classList.add('abierta'); }
+function cerrarCapas() { document.querySelectorAll('.capa').forEach(c => c.classList.remove('abierta')); }
+document.querySelectorAll('[data-cerrar]').forEach(b => b.addEventListener('click', cerrarCapas));
+document.querySelectorAll('.capa').forEach(c => c.addEventListener('click', e => { if (e.target === c) cerrarCapas(); }));
+addEventListener('keydown', e => { if (e.key === 'Escape') cerrarCapas(); });
+
+function abrirProducto(id) {
+  const p = prod(id); seleccion.id = id;
+  $('prodImg').innerHTML = remeraSVG(p, false).replace('<svg', '<svg class="producto-img"');
+  $('prodNombre').textContent = p.nombre;
+  $('prodDesc').textContent = p.desc;
+  $('prodPrecio').textContent = precio(p.precio);
+  $('prodTalles').innerHTML = TIENDA.talles.map(t =>
+    `<button class="talle${t === seleccion.talle ? ' activo' : ''}" data-talle="${t}" aria-pressed="${t === seleccion.talle}">${t}</button>`).join('');
+  $('prodTalles').querySelectorAll('.talle').forEach(b => b.addEventListener('click', () => {
+    seleccion.talle = b.dataset.talle;
+    $('prodTalles').querySelectorAll('.talle').forEach(x => { x.classList.toggle('activo', x === b); x.setAttribute('aria-pressed', x === b); });
+  }));
+  cerrarCapas(); abrirCapa('capaProducto');
+}
+
+$('btnAgregar').addEventListener('click', () => {
+  const ex = carrito.find(i => i.id === seleccion.id && i.talle === seleccion.talle);
+  if (ex) ex.cant++; else carrito.push({ id: seleccion.id, talle: seleccion.talle, cant: 1 });
+  cerrarCapas(); actualizar(true);
+  avisar(`${prod(seleccion.id).nombre} (${seleccion.talle}) agregada`);
+});
+
+function avisar(t) {
+  const a = $('aviso'); a.textContent = t; a.classList.add('visible');
+  clearTimeout(avisar.t); avisar.t = setTimeout(() => a.classList.remove('visible'), 1800);
+}
+
+function totalItems() { return carrito.reduce((s, i) => s + i.cant, 0); }
+function totalPesos() { return carrito.reduce((s, i) => s + i.cant * prod(i.id).precio, 0); }
+
+function actualizar(salto) {
+  const b = $('badge'), n = totalItems();
+  b.textContent = n; b.classList.toggle('visible', n > 0);
+  if (salto) { b.classList.remove('salto'); void b.offsetWidth; b.classList.add('salto'); }
+  $('btnCarrito').setAttribute('aria-label', `Abrir carrito, ${n} artículo${n === 1 ? '' : 's'}`);
+  const lista = $('listaCarrito');
+  if (!carrito.length) {
+    lista.innerHTML = '<p class="vacio">Tu carrito está vacío. Tocá una remera para agregarla.</p>';
+  } else {
+    lista.innerHTML = carrito.map((i, k) => {
+      const p = prod(i.id);
+      return `<div class="item">
+        ${remeraSVG(p, false)}
+        <div>
+          <div class="item-nombre">${p.nombre}</div>
+          <div class="item-sub">Talle ${i.talle} · ${precio(p.precio)} c/u</div>
+          <div class="item-controles">
+            <button class="ctrl" data-accion="menos" data-k="${k}" aria-label="Restar uno">−</button>
+            <span class="cant">${i.cant}</span>
+            <button class="ctrl" data-accion="mas" data-k="${k}" aria-label="Sumar uno">+</button>
+            <span class="item-subtotal">${precio(i.cant * p.precio)}</span>
+            <button class="quitar" data-accion="quitar" data-k="${k}">Quitar</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  $('totalCarrito').querySelector('b').textContent = precio(totalPesos());
+  $('btnFinalizar').disabled = !carrito.length;
+  $('btnFinalizar').style.opacity = carrito.length ? 1 : .5;
+}
+
+$('listaCarrito').addEventListener('click', e => {
+  const b = e.target.closest('[data-accion]'); if (!b) return;
+  const i = carrito[+b.dataset.k];
+  if (b.dataset.accion === 'mas') i.cant++;
+  if (b.dataset.accion === 'menos') i.cant--;
+  if (b.dataset.accion === 'quitar' || i.cant <= 0) carrito.splice(+b.dataset.k, 1);
+  actualizar(false);
+});
+
+function mensajePedido() {
+  const lineas = carrito.map(i => {
+    const p = prod(i.id);
+    return `• ${i.cant} × ${p.nombre} (talle ${i.talle}) — ${precio(i.cant * p.precio)}`;
+  });
+  return `${TIENDA.demo ? '(Pedido de prueba desde la tienda demo)\n\n' : ''}Hola ${TIENDA.nombre}, quiero hacer este pedido:\n\n${lineas.join('\n')}\n\nTotal: ${precio(totalPesos())}`;
+}
+function irAWhatsApp() {
+  if (!carrito.length) { avisar('Tu carrito está vacío'); return; }
+  window.open(`https://wa.me/${TIENDA.whatsapp}?text=${encodeURIComponent(mensajePedido())}`, '_blank', 'noopener');
+}
+
+$('btnCarrito').addEventListener('click', () => { actualizar(false); abrirCapa('capaCarrito'); });
+$('btnFinalizar').addEventListener('click', irAWhatsApp);
+function clickCaja() {
+  if (!carrito.length) { avisar('Primero elegí una remera'); return; }
+  irAWhatsApp();
+}
+
+/* Vista de lista */
+$('listaProductos').innerHTML = TIENDA.productos.map(p => `<div class="lista-item">
+  ${remeraSVG(p, false)}
+  <div><div class="item-nombre">${p.nombre}</div><div class="item-sub">${precio(p.precio)}</div></div>
+  <button data-ver="${p.id}">Ver</button></div>`).join('');
+$('listaProductos').addEventListener('click', e => { const b = e.target.closest('[data-ver]'); if (b) abrirProducto(b.dataset.ver); });
+$('btnLista').addEventListener('click', () => abrirCapa('capaLista'));
+
+$('btnQuieroMia').href = `https://wa.me/${TIENDA.whatsapp}?text=${encodeURIComponent('Hola, vi la tienda 360 de demostración y quiero una para mi emprendimiento.')}`;
+
+actualizar(false);
+
+/* =========================================================
+   ESCENA 3D (Three.js) — sala caminable
+   ========================================================= */
+const C = { grafito: 0x2E2F33, hueso: 0xF2EEE6, hueso2: 0xE2DBCF, cuero: 0xB0674A, cueroOsc: 0x8F4F37, madera: 0xC29B76, verde: 0x6F7F55, verde2: 0x5A6945 };
+const SALA = { ancho: 8, fondo: 10, alto: 3.2 };
+const lienzo = document.getElementById('lienzo');
+const renderer = new THREE.WebGLRenderer({ canvas: lienzo, antialias: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(C.hueso);
+const camera = new THREE.PerspectiveCamera(70, 1, 0.05, 50);
+camera.rotation.order = 'YXZ';
+const jugador = { x: 0, z: 3.4, yaw: 0, pitch: -0.05, altura: 1.6 };
+
+scene.add(new THREE.HemisphereLight(0xffffff, 0xB89472, 0.75));
+const sol = new THREE.DirectionalLight(0xffffff, 0.55); sol.position.set(2, 4, 3); scene.add(sol);
+scene.add(new THREE.AmbientLight(0xffffff, 0.35));
+
+const mat = (color, extra = {}) => new THREE.MeshStandardMaterial(Object.assign({ color, roughness: 0.9, metalness: 0, flatShading: true }, extra));
+function caja(w, h, d, color, x, y, z, padre = scene) {
+  const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat(color)); m.position.set(x, y, z); padre.add(m); return m;
+}
+function textura(ancho, alto, dibujar) {
+  const c = document.createElement('canvas'); c.width = ancho; c.height = alto;
+  dibujar(c.getContext('2d'), ancho, alto);
+  const t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
+}
+const FUENTE = '"Bricolage Grotesque", system-ui, sans-serif';
+function toldo2D(g, x, y, w, h, n, colores, barra) {
+  const sw = w / n; g.fillStyle = barra; g.fillRect(x, y, w, h * 0.16);
+  for (let i = 0; i < n; i++) {
+    g.fillStyle = colores[i % 2];
+    const x0 = x + i * sw, y0 = y + h * 0.16, hh = h * 0.84 - sw / 2;
+    g.fillRect(x0, y0, sw, hh); g.beginPath(); g.arc(x0 + sw / 2, y0 + hh, sw / 2, 0, Math.PI); g.fill();
+  }
+}
+
+/* --- Habitación --- */
+const { ancho: A, fondo: F, alto: H } = SALA;
+const texPiso = textura(512, 512, (g, w, h) => {
+  for (let i = 0; i < 8; i++) { g.fillStyle = i % 2 ? '#BD9571' : '#C7A07B'; g.fillRect(0, i * 64, w, 64); }
+  g.fillStyle = 'rgba(0,0,0,.10)'; for (let i = 0; i < 8; i++) { const off = (i % 2) * 128; for (let x = off; x < w; x += 256) g.fillRect(x, i * 64, 2, 64); }
+});
+texPiso.wrapS = texPiso.wrapT = THREE.RepeatWrapping; texPiso.repeat.set(A / 2, F / 2);
+const piso = new THREE.Mesh(new THREE.PlaneGeometry(A, F), new THREE.MeshStandardMaterial({ map: texPiso, roughness: 0.85 }));
+piso.rotation.x = -Math.PI / 2; scene.add(piso);
+const techo = new THREE.Mesh(new THREE.PlaneGeometry(A, F), new THREE.MeshBasicMaterial({ color: 0xF4F0E8 })); techo.rotation.x = Math.PI / 2; techo.position.y = H; scene.add(techo);
+[[0, -F / 2, 0, A], [0, F / 2, Math.PI, A], [-A / 2, 0, Math.PI / 2, F], [A / 2, 0, -Math.PI / 2, F]].forEach(([x, z, ry, w]) => {
+  const p = new THREE.Mesh(new THREE.PlaneGeometry(w, H), mat(C.hueso)); p.position.set(x, H / 2, z); p.rotation.y = ry; scene.add(p);
+  const z2 = new THREE.Mesh(new THREE.PlaneGeometry(w, 0.12), mat(C.grafito)); z2.position.set(x, 0.06, z); z2.rotation.y = ry;
+  z2.translateZ(0.005); scene.add(z2);
+});
+// paneles de luz en el techo
+[[-1.5, -2], [1.5, -2], [-1.5, 2], [1.5, 2]].forEach(([x, z]) => {
+  const l = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.04, 0.5), new THREE.MeshBasicMaterial({ color: 0xFFFFFF })); l.position.set(x, H - 0.02, z); scene.add(l);
+});
+
+/* --- Pared del frente: logo --- */
+let texLogo;
+function crearLogo() {
+  texLogo = textura(1024, 512, (g, w, h) => {
+    toldo2D(g, 212, 40, 600, 150, 9, ['#B0674A', '#2E2F33'], '#2E2F33');
+    g.fillStyle = '#2E2F33'; g.textAlign = 'center'; g.font = `700 150px ${FUENTE}`; g.fillText('qué facha', w / 2, 360);
+    g.fillStyle = '#58595E'; g.font = `400 48px ${FUENTE}`; g.fillText('Tu comercio, vivo.', w / 2, 440);
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(4.4, 2.2), new THREE.MeshBasicMaterial({ map: texLogo, transparent: true }));
+  m.position.set(0, 1.85, -F / 2 + 0.01); scene.add(m);
+}
+
+/* --- Pared derecha: remeras --- */
+const interactivos = [];
+const s = 0.0045;
+const forma = new THREE.Shape();
+const P = (x, y) => [(x - 100) * s, -(y - 120) * s];
+forma.moveTo(...P(62, 30));
+[[22, 50], [2, 96], [34, 110], [44, 88], [44, 226], [156, 226], [156, 88], [166, 110], [198, 96], [178, 50], [138, 30]].forEach(p => forma.lineTo(...P(...p)));
+forma.quadraticCurveTo(...P(100, 58), ...P(62, 30));
+const geoRemera = new THREE.ExtrudeGeometry(forma, { depth: 0.04, bevelEnabled: false });
+const barral = new THREE.Mesh(new THREE.CylinderGeometry(0.02, 0.02, 3.4, 8), mat(C.grafito));
+barral.rotation.x = Math.PI / 2; barral.position.set(A / 2 - 0.22, 2.1, 0); scene.add(barral);
+[-1.7, 1.7].forEach(z => caja(0.2, 0.04, 0.04, C.grafito, A / 2 - 0.1, 2.1, z));
+function crearRemeras() {
+  TIENDA.productos.forEach((p, i) => {
+    const g = new THREE.Group();
+    const cuerpo = new THREE.Mesh(geoRemera, mat(new THREE.Color(p.tela).getHex(), { flatShading: false }));
+    g.add(cuerpo);
+    const tex = textura(256, 160, (c, w, h) => {
+      toldo2D(c, 58, 10, 140, 60, 5, p.franjas, p.texto === '#2E2F33' ? '#2E2F33' : '#F2EEE6');
+      c.fillStyle = p.texto; c.textAlign = 'center'; c.font = `700 40px ${FUENTE}`; c.fillText('qué facha', w / 2, 118);
+    });
+    const logo = new THREE.Mesh(new THREE.PlaneGeometry(0.34, 0.21), new THREE.MeshBasicMaterial({ map: tex, transparent: true }));
+    logo.position.set(0, 0.09, 0.045); g.add(logo);
+    // percha
+    const gancho = new THREE.Mesh(new THREE.TorusGeometry(0.04, 0.008, 6, 12, Math.PI * 1.3), mat(C.grafito));
+    gancho.position.set(0, 0.52, 0.02); gancho.rotation.z = -0.4; g.add(gancho);
+    const brazo = new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.015, 0.015), mat(C.grafito)); brazo.position.set(0, 0.44, 0.02); g.add(brazo);
+    g.position.set(A / 2 - 0.26, 1.6, -1.1 + i * 1.1); g.rotation.y = -Math.PI / 2;
+    g.traverse(o => { o.userData.producto = p.id; });
+    scene.add(g); interactivos.push(g);
+    // etiqueta de precio
+    const texE = textura(256, 96, (c, w, h) => {
+      c.fillStyle = '#2E2F33'; c.beginPath(); c.roundRect ? c.roundRect(0, 0, w, h, 20) : c.rect(0, 0, w, h); c.fill();
+      c.fillStyle = '#F2EEE6'; c.textAlign = 'center'; c.font = `500 34px ${FUENTE}`; c.fillText(p.nombre.replace('Remera ', ''), w / 2, 40);
+      c.font = `700 32px ${FUENTE}`; c.fillText(precio(p.precio), w / 2, 80);
+    });
+    const et = new THREE.Mesh(new THREE.PlaneGeometry(0.3, 0.11), new THREE.MeshBasicMaterial({ map: texE, transparent: true }));
+    et.position.set(A / 2 - 0.02, 0.75, -1.1 + i * 1.1); et.rotation.y = -Math.PI / 2; scene.add(et);
+  });
+}
+
+/* --- Pared izquierda: mostrador, caja y toldo --- */
+const mostrador = new THREE.Group(); scene.add(mostrador);
+caja(0.7, 0.96, 3.6, C.cuero, -A / 2 + 0.35, 0.48, 0, mostrador);
+caja(0.8, 0.05, 3.8, C.grafito, -A / 2 + 0.38, 0.985, 0, mostrador);
+for (let z = -1.5; z <= 1.5; z += 0.5) caja(0.01, 0.9, 0.02, C.cueroOsc, -A / 2 + 0.705, 0.48, z, mostrador);
+const cajaReg = new THREE.Group();
+caja(0.38, 0.12, 0.46, 0x3B3C41, 0, 0.06, 0, cajaReg);
+caja(0.12, 0.2, 0.4, C.grafito, -0.1, 0.22, 0, cajaReg);
+const pant = caja(0.01, 0.1, 0.3, 0x9DB89E, -0.035, 0.24, 0, cajaReg); pant.material = new THREE.MeshBasicMaterial({ color: 0x9DB89E });
+caja(0.14, 0.02, 0.26, C.hueso, 0.08, 0.13, -0.05, cajaReg);
+caja(0.1, 0.02, 0.1, C.cuero, 0.08, 0.13, 0.15, cajaReg);
+cajaReg.position.set(-A / 2 + 0.4, 1.01, 0); cajaReg.traverse(o => { o.userData.caja = true; });
+scene.add(cajaReg); interactivos.push(cajaReg);
+// toldo 3D sobre el mostrador
+for (let i = 0; i < 12; i++) {
+  const z = -1.65 + i * 0.3;
+  const franja = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.15, 0.6, 8, 1, false, 0, Math.PI), mat(i % 2 ? C.hueso2 : C.cuero, { side: THREE.DoubleSide }));
+  franja.rotation.z = Math.PI / 2; franja.rotation.y = Math.PI / 2; franja.position.set(-A / 2 + 0.3, 2.45, z);
+  scene.add(franja);
+}
+caja(0.62, 0.06, 3.6, C.grafito, -A / 2 + 0.31, 2.47, 0);
+let texCartel;
+function crearCartelCaja() {
+  texCartel = textura(512, 128, (g, w, h) => {
+    g.fillStyle = '#2E2F33'; g.beginPath(); g.roundRect ? g.roundRect(0, 0, w, h, 64) : g.rect(0, 0, w, h); g.fill();
+    g.fillStyle = '#F2EEE6'; g.textAlign = 'center'; g.font = `700 54px ${FUENTE}`; g.fillText('Pedí por WhatsApp', w / 2, 82);
+  });
+  const c = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 0.27), new THREE.MeshBasicMaterial({ map: texCartel, transparent: true }));
+  c.position.set(-A / 2 + 0.02, 1.85, 0); c.rotation.y = Math.PI / 2; scene.add(c);
+  const texR = textura(512, 160, (g, w, h) => { g.fillStyle = '#F2EEE6'; g.textAlign = 'center'; g.font = `700 110px ${FUENTE}`; g.fillText('Caja', w / 2, 120); });
+  const r = new THREE.Mesh(new THREE.PlaneGeometry(0.9, 0.28), new THREE.MeshBasicMaterial({ map: texR, transparent: true }));
+  r.position.set(-A / 2 + 0.715, 0.55, 0); r.rotation.y = Math.PI / 2; scene.add(r);
+}
+
+/* --- Pared trasera: cuadro y plantas --- */
+function crearCuadro() {
+  const t = textura(1024, 700, (g, w, h) => {
+    g.fillStyle = '#3B3C41'; g.fillRect(0, 0, w, h); g.fillStyle = '#2E2F33'; g.fillRect(34, 34, w - 68, h - 68);
+    g.fillStyle = '#F2EEE6'; g.font = `700 130px ${FUENTE}`; g.fillText('Hacete', 110, 290); g.fillText('visible.', 110, 420);
+    g.fillStyle = '#C9C6BE'; g.font = `400 42px ${FUENTE}`; g.fillText('Presencia en Google y web para comercios de Durazno', 110, 530);
+  });
+  const m = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 1.5), new THREE.MeshBasicMaterial({ map: t })); m.position.set(0, 1.7, F / 2 - 0.02); m.rotation.y = Math.PI; scene.add(m);
+}
+function planta(x, z) {
+  const g = new THREE.Group();
+  const maceta = new THREE.Mesh(new THREE.CylinderGeometry(0.22, 0.16, 0.42, 7), mat(C.cuero)); maceta.position.y = 0.21; g.add(maceta);
+  [[0, 0.8, 0, 0.32], [-0.18, 0.62, 0.05, 0.24], [0.17, 0.66, -0.06, 0.25], [0.02, 1.05, 0.02, 0.2]].forEach(([x2, y2, z2, r], i) => {
+    const h = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 0), mat(i % 2 ? C.verde2 : C.verde)); h.position.set(x2, y2, z2); g.add(h);
+  });
+  g.position.set(x, 0, z); scene.add(g);
+}
+planta(-2.6, F / 2 - 0.45); planta(2.6, F / 2 - 0.45); planta(A / 2 - 0.45, -F / 2 + 0.45);
+
+/* =========================================================
+   CONTROLES: joystick, mirar arrastrando, teclado, tocar
+   ========================================================= */
+const joy = document.getElementById('joy'), perilla = document.getElementById('perilla');
+let joyId = null, jx = 0, jy = 0, joyCx = 0, joyCy = 0;
+joy.addEventListener('pointerdown', e => {
+  joyId = e.pointerId; joy.setPointerCapture(e.pointerId);
+  const r = joy.getBoundingClientRect(); joyCx = r.left + r.width / 2; joyCy = r.top + r.height / 2; moverJoy(e); ocultarPista();
+});
+joy.addEventListener('pointermove', e => { if (e.pointerId === joyId) moverJoy(e); });
+const soltarJoy = e => { if (e.pointerId !== joyId) return; joyId = null; jx = jy = 0; perilla.style.transform = 'translate(-50%,-50%)'; };
+joy.addEventListener('pointerup', soltarJoy); joy.addEventListener('pointercancel', soltarJoy);
+function moverJoy(e) {
+  const R = 46; let dx = e.clientX - joyCx, dy = e.clientY - joyCy; const d = Math.hypot(dx, dy);
+  if (d > R) { dx *= R / d; dy *= R / d; }
+  jx = dx / R; jy = dy / R;
+  perilla.style.transform = `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px))`;
+}
+
+let mirarId = null, mx = 0, my = 0, movido = 0;
+lienzo.addEventListener('pointerdown', e => { if (mirarId !== null) return; mirarId = e.pointerId; mx = e.clientX; my = e.clientY; movido = 0; lienzo.setPointerCapture(e.pointerId); });
+lienzo.addEventListener('pointermove', e => {
+  if (e.pointerId !== mirarId) return;
+  const dx = e.clientX - mx, dy = e.clientY - my; mx = e.clientX; my = e.clientY; movido += Math.abs(dx) + Math.abs(dy);
+  if (movido > 8) ocultarPista();
+  jugador.yaw -= dx * 0.005; jugador.pitch = Math.max(-1.1, Math.min(1.1, jugador.pitch - dy * 0.005));
+});
+lienzo.addEventListener('pointerup', e => {
+  if (e.pointerId !== mirarId) return; mirarId = null;
+  if (movido < 8) tocar(e.clientX, e.clientY);
+});
+lienzo.addEventListener('pointercancel', e => { if (e.pointerId === mirarId) mirarId = null; });
+
+const teclas = {};
+addEventListener('keydown', e => { if (!document.querySelector('.capa.abierta')) { teclas[e.key.toLowerCase()] = true; if (/^(w|a|s|d|arrow)/.test(e.key.toLowerCase())) ocultarPista(); } });
+addEventListener('keyup', e => { teclas[e.key.toLowerCase()] = false; });
+
+const rc = new THREE.Raycaster(), v2 = new THREE.Vector2();
+function objetivo(nx, ny, maxDist) {
+  v2.set(nx, ny); rc.setFromCamera(v2, camera);
+  const hit = rc.intersectObjects(interactivos, true)[0];
+  return hit && hit.distance <= maxDist ? hit.object.userData : null;
+}
+function activar(d) {
+  if (!d) return;
+  if (d.producto) abrirProducto(d.producto); else if (d.caja) clickCaja();
+}
+function tocar(cx, cy) { activar(objetivo((cx / innerWidth) * 2 - 1, -(cy / innerHeight) * 2 + 1, 7)); }
+
+const aviso3d = document.getElementById('mira');
+const btnInteractuar = document.getElementById('btnInteractuar');
+let enMira = null;
+btnInteractuar.addEventListener('click', () => activar(enMira));
+addEventListener('keydown', e => { if ((e.key === 'e' || e.key === 'Enter') && enMira && !document.querySelector('.capa.abierta')) activar(enMira); });
+
+const pista = document.getElementById('pista');
+function ocultarPista() { pista.classList.add('oculta'); }
+setTimeout(ocultarPista, 7000);
+
+/* =========================================================
+   BUCLE
+   ========================================================= */
+function ajustar() {
+  const w = innerWidth, h = innerHeight; renderer.setSize(w, h, false);
+  camera.aspect = w / h; camera.fov = w < h ? 78 : 65; camera.updateProjectionMatrix();
+}
+addEventListener('resize', ajustar); ajustar();
+const reloj = new THREE.Clock();
+function bucle() {
+  const dt = Math.min(reloj.getDelta(), 0.05);
+  if (!document.querySelector('.capa.abierta')) {
+    let fx = -jy, sx = jx;
+    if (teclas['w'] || teclas['arrowup']) fx = 1; if (teclas['s'] || teclas['arrowdown']) fx = -1;
+    if (teclas['a']) sx = -1; if (teclas['d']) sx = 1;
+    if (teclas['arrowleft']) jugador.yaw += 1.8 * dt; if (teclas['arrowright']) jugador.yaw -= 1.8 * dt;
+    const vel = 2.2 * dt, sy = Math.sin(jugador.yaw), cy = Math.cos(jugador.yaw);
+    let nx = jugador.x + (-sy * fx + cy * sx) * vel, nz = jugador.z + (-cy * fx - sy * sx) * vel;
+    nx = Math.max(-A / 2 + 0.35, Math.min(A / 2 - 0.7, nx)); nz = Math.max(-F / 2 + 0.35, Math.min(F / 2 - 0.35, nz));
+    if (nx < -A / 2 + 1.1 && Math.abs(nz) < 2.2) nx = -A / 2 + 1.1; // mostrador
+    jugador.x = nx; jugador.z = nz;
+  }
+  camera.position.set(jugador.x, jugador.altura, jugador.z);
+  camera.rotation.set(jugador.pitch, jugador.yaw, 0);
+  const d = objetivo(0, 0, 3.2);
+  if ((d && (d.producto || d.caja)) !== (enMira && (enMira.producto || enMira.caja))) {
+    enMira = d;
+    if (d) {
+      btnInteractuar.textContent = d.producto ? `Ver ${prod(d.producto).nombre}` : (carrito.length ? 'Pedir por WhatsApp' : 'Caja: primero elegí una remera');
+      btnInteractuar.classList.add('visible'); aviso3d.classList.add('activa');
+    } else { btnInteractuar.classList.remove('visible'); aviso3d.classList.remove('activa'); }
+  }
+  renderer.render(scene, camera);
+  requestAnimationFrame(bucle);
+}
+
+/* Las texturas con texto se dibujan cuando la tipografía está lista */
+function construirConTexto() { crearLogo(); crearRemeras(); crearCartelCaja(); crearCuadro(); }
+let construido = false;
+function iniciar() { if (construido) return; construido = true; construirConTexto(); document.getElementById('cargando').classList.add('oculta'); bucle(); }
+(document.fonts && document.fonts.load ? document.fonts.load(`700 60px "Bricolage Grotesque"`) : Promise.resolve()).then(iniciar, iniciar);
+setTimeout(iniciar, 2500);
+
+</script>
+</body>
+</html>
