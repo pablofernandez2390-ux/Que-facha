@@ -124,6 +124,14 @@
   .tienda360 h2 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; }
   .tienda360 p { color: #C9C6BE; max-width: 50ch; margin-top: 14px; }
   @media (min-width: 760px) { .tienda360 .contenedor { grid-template-columns: 1.4fr 1fr; } .tienda360 .accion { justify-self: end; } }
+  .tienda360 .contenedor.apilado { grid-template-columns: 1fr; }
+  .tiendas { display: grid; gap: 16px; }
+  .tienda-card { background: #3B3C41; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
+  .tienda-card h3 { font-size: 24px; letter-spacing: -0.01em; }
+  .tienda360 .tienda-card p { margin-top: 0; }
+  .tienda360 .tienda-card .nota { font-size: 14px; color: #A9A6A0; }
+  .tienda-card .boton { align-self: flex-start; margin-top: 10px; }
+  @media (min-width: 760px) { .tiendas { grid-template-columns: 1fr 1fr; } }
 
   /* Pasos */
   .pasos { display: grid; gap: 32px; counter-reset: paso; }
@@ -250,14 +258,27 @@
     </div>
   </section>
 
-  <section class="tienda360" id="tienda360">
-    <div class="contenedor">
+  <section class="tienda360" id="tiendas">
+    <div class="contenedor apilado">
       <div>
         <span class="etiqueta">Nuevo</span>
-        <h2>Tiendas 360 para emprendimientos sin local.</h2>
-        <p>Una sala virtual donde tus clientes recorren, tocan tus productos, arman el carrito y te hacen el pedido directo por WhatsApp.</p>
+        <h2>Tiendas virtuales para emprendimientos sin local.</h2>
+        <p>Tus clientes recorren tu tienda, tocan tus productos, arman el carrito y te hacen el pedido directo por WhatsApp. Elegí la experiencia que mejor va con tu marca.</p>
       </div>
-      <div class="accion"><a class="boton claro" href="tienda360/">Entrá a la tienda demo</a></div>
+      <div class="tiendas">
+        <article class="tienda-card">
+          <h3>Tienda 360</h3>
+          <p>Una sala que se recorre girando la vista. Liviana y rápida.</p>
+          <p class="nota">Funciona en casi cualquier teléfono.</p>
+          <a class="boton claro" href="tienda360/">Entrá a la tienda 360</a>
+        </article>
+        <article class="tienda-card">
+          <h3>Tienda 3D</h3>
+          <p>Un espacio para caminar con un pad, como en un videojuego.</p>
+          <p class="nota">Pensada para teléfonos de gama media y alta.</p>
+          <a class="boton claro" href="tienda3d/">Caminá por la tienda 3D</a>
+        </article>
+      </div>
     </div>
   </section>
 
