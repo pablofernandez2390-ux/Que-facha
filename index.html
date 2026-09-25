@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Qué Facha | Tu comercio bien presentado en internet — Durazno</title>
+<meta name="description" content="Ficha de Google Maps, web y WhatsApp para comercios de Durazno, Uruguay.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<!--
+  DATOS DE CONTACTO:
+  - WhatsApp: 59891782945 (aparece 2 veces, en los enlaces wa.me).
+  - Correo: quefacha.durazno@gmail.com (aparece 2 veces). Correo de la marca.
+  - Precios: buscá "desde $" y ajustalos cuando los valides con tus primeros clientes.
+-->
+<style>
+  :root {
+    --grafito: #2E2F33;
+    --hueso: #F2EEE6;
+    --hueso-2: #E2DBCF;
+    --cuero: #B0674A;
+    --cuero-osc: #8F4F37;
+    --piedra: #8A8780;
+    --texto-2: #58595E;
+    --ancho: 1040px;
+    --franja: 64px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { color-scheme: light; scroll-behavior: smooth; }
+  body {
+    font-family: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    background: var(--hueso);
+    color: var(--grafito);
+    font-size: 18px;
+    line-height: 1.6;
+  }
+  a { color: inherit; }
+  .contenedor { max-width: var(--ancho); margin: 0 auto; padding: 0 24px; }
+
+  /* Toldo */
+  .toldo { border-top: 12px solid var(--grafito); overflow: hidden; height: 108px; }
+  .franjas { display: flex; width: max-content; }
+  .franjas span {
+    flex: 0 0 var(--franja);
+    height: 64px;
+    border-radius: 0 0 calc(var(--franja) / 2) calc(var(--franja) / 2);
+    background: var(--cuero);
+  }
+  .franjas span:nth-child(even) { background: var(--hueso-2); }
+
+  /* Barra */
+  .barra { display: flex; justify-content: space-between; align-items: center; padding-top: 8px; }
+  .marca { font-weight: 700; font-size: 26px; letter-spacing: -0.02em; text-decoration: none; }
+  .barra nav a { text-decoration: none; font-size: 16px; color: var(--texto-2); margin-left: 20px; }
+  .barra nav a:hover { color: var(--grafito); }
+
+  /* Portada */
+  .portada { padding: 72px 0 88px; }
+  .portada h1 {
+    font-size: clamp(44px, 9vw, 92px);
+    line-height: 1.02;
+    letter-spacing: -0.035em;
+    font-weight: 700;
+    max-width: 12ch;
+  }
+  .portada p { font-size: clamp(18px, 2.4vw, 22px); color: var(--texto-2); max-width: 36ch; margin: 28px 0 36px; }
+  .boton {
+    display: inline-flex; align-items: center; gap: 10px;
+    background: var(--grafito); color: var(--hueso);
+    text-decoration: none; font-weight: 500; font-size: 18px;
+    padding: 16px 26px; border-radius: 999px;
+  }
+  .boton:hover { background: #1F2023; }
+  .boton:focus-visible, a:focus-visible { outline: 3px solid var(--cuero); outline-offset: 3px; }
+  .boton.claro { background: var(--hueso); color: var(--grafito); }
+  .boton.claro:hover { background: #fff; }
+
+  /* Prueba */
+  .prueba { background: var(--grafito); color: var(--hueso); padding: 72px 0; }
+  .prueba .contenedor { display: grid; gap: 40px; }
+  .buscador {
+    background: #fff; color: var(--grafito); border-radius: 999px;
+    padding: 16px 24px; font-size: 20px; display: flex; gap: 12px; align-items: center;
+    max-width: 440px;
+  }
+  .buscador svg { flex: 0 0 22px; }
+  .prueba h2 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; }
+  .prueba p { color: #C9C6BE; max-width: 52ch; margin-top: 16px; }
+
+  /* Servicios */
+  .seccion { padding: 88px 0; }
+  .seccion > .contenedor > h2 { font-size: clamp(30px, 5vw, 46px); letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 40px; }
+  .servicio {
+    display: grid; grid-template-columns: 1fr; gap: 16px;
+    padding: 36px 0; border-top: 2px solid var(--hueso-2);
+  }
+  .servicio:last-child { border-bottom: 2px solid var(--hueso-2); }
+  .servicio .tipo { color: var(--cuero-osc); font-weight: 500; font-size: 16px; }
+  .servicio h3 { font-size: clamp(28px, 4vw, 38px); letter-spacing: -0.02em; line-height: 1.1; }
+  .servicio .precio { font-size: 20px; font-weight: 500; }
+  .servicio .precio small { font-weight: 400; color: var(--piedra); font-size: 16px; }
+  .servicio ul { list-style: none; color: var(--texto-2); }
+  .servicio li { padding-left: 22px; position: relative; margin-bottom: 6px; }
+  .servicio li::before {
+    content: ""; position: absolute; left: 0; top: 0.62em;
+    width: 10px; height: 10px; border-radius: 0 0 5px 5px; background: var(--cuero);
+  }
+  .servicio.destacado h3::after {
+    content: "El punto de partida"; display: inline-block; vertical-align: middle;
+    font-size: 14px; font-weight: 500; letter-spacing: 0;
+    background: var(--cuero); color: #fff; padding: 4px 12px; border-radius: 999px; margin-left: 12px;
+  }
+  @media (min-width: 760px) {
+    .servicio { grid-template-columns: 1.1fr 1.4fr; column-gap: 48px; }
+    .servicio .cabeza { grid-row: span 2; }
+  }
+
+
+  /* Tienda 360 */
+  .tienda360 { background: var(--grafito); color: var(--hueso); padding: 72px 0; }
+  .tienda360 .contenedor { display: grid; gap: 28px; align-items: center; }
+  .tienda360 .etiqueta { display: inline-block; background: var(--cuero); color: #fff; font-size: 14px; font-weight: 500; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+  .tienda360 h2 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; }
+  .tienda360 p { color: #C9C6BE; max-width: 50ch; margin-top: 14px; }
+  @media (min-width: 760px) { .tienda360 .contenedor { grid-template-columns: 1.4fr 1fr; } .tienda360 .accion { justify-self: end; } }
+
+  /* Pasos */
+  .pasos { display: grid; gap: 32px; counter-reset: paso; }
+  .paso { counter-increment: paso; }
+  .paso::before {
+    content: counter(paso);
+    display: flex; align-items: center; justify-content: center;
+    width: 44px; height: 44px; border-radius: 50%;
+    border: 2px solid var(--grafito); font-weight: 700; margin-bottom: 14px;
+  }
+  .paso h3 { font-size: 22px; line-height: 1.25; margin-bottom: 6px; }
+  .paso p { color: var(--texto-2); font-size: 17px; }
+  @media (min-width: 760px) { .pasos { grid-template-columns: repeat(4, 1fr); } }
+
+  /* Promesa */
+  .promesa { background: var(--hueso-2); padding: 72px 0; }
+  .promesa h2 { font-size: clamp(28px, 4.5vw, 40px); letter-spacing: -0.02em; line-height: 1.15; max-width: 22ch; margin-bottom: 16px; }
+  .promesa p { max-width: 56ch; color: var(--texto-2); }
+
+  /* Contacto */
+  .contacto { background: var(--grafito); color: var(--hueso); padding: 88px 0 56px; }
+  .contacto h2 { font-size: clamp(34px, 6vw, 60px); letter-spacing: -0.03em; line-height: 1.05; max-width: 14ch; margin-bottom: 20px; }
+  .contacto p { color: #C9C6BE; max-width: 48ch; margin-bottom: 32px; }
+  .datos { margin-top: 48px; display: grid; gap: 8px; color: #C9C6BE; font-size: 16px; }
+  .pie {
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid #45464B;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 15px; color: var(--piedra);
+  }
+  .pie strong { color: var(--hueso); }
+
+  @media (max-width: 520px) {
+    .barra nav a:not(:last-child) { display: none; }
+    :root { --franja: 48px; }
+    .toldo { height: 92px; }
+    .franjas span { height: 52px; }
+  }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="toldo" aria-hidden="true"><div class="franjas" id="franjas"></div></div>
+  <div class="contenedor barra">
+    <a class="marca" href="#">qué facha</a>
+    <nav aria-label="Secciones">
+      <a href="#servicios">Servicios</a>
+      <a href="#como">Cómo trabajo</a>
+      <a href="#contacto">Contacto</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+  <section class="portada">
+    <div class="contenedor">
+      <h1>Que tu comercio se vea bien en internet.</h1>
+      <p>Ficha de Google Maps, web y WhatsApp para comercios de Durazno. Lo armo, lo mantengo y te muestro los resultados.</p>
+      <a class="boton" href="https://wa.me/59891782945?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20de%20mi%20comercio" target="_blank" rel="noopener">
+        Pedí tu diagnóstico gratis
+      </a>
+    </div>
+  </section>
+
+  <section class="prueba">
+    <div class="contenedor">
+      <div class="buscador" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#8A8780" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+        <span>heladería Durazno</span>
+      </div>
+      <div>
+        <h2>Probá buscar tu rubro en Google.</h2>
+        <p>En Durazno pasa algo curioso: la búsqueda común devuelve recetas con durazno en vez de comercios de la ciudad. Por eso la ficha de Google Maps, que se basa en la ubicación y no en palabras, es la forma más directa de que te encuentren. Si no aparecés ahí, aparece tu competencia.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="seccion" id="servicios">
+    <div class="contenedor">
+      <h2>Tres formas de trabajar juntos</h2>
+
+      <article class="servicio destacado">
+        <div class="cabeza">
+          <p class="tipo">Pago único</p>
+          <h3>Aparecé en Google</h3>
+          <p class="precio">desde $3.500 <small>una sola vez</small></p>
+        </div>
+        <ul>
+          <li>Ficha de Google Maps creada o recuperada y verificada a tu nombre.</li>
+          <li>Categoría, horario, teléfono, WhatsApp y ubicación correctos.</li>
+          <li>Unas 10 fotos de tu fachada, tu local y tus productos.</li>
+          <li>Una web de una página con lo que vendés y cómo contactarte.</li>
+          <li>Un QR para el mostrador que invita a tus clientes a dejar reseñas.</li>
+          <li>El primer mes de mantenimiento incluido, con informe a los 30 días.</li>
+        </ul>
+      </article>
+
+      <article class="servicio">
+        <div class="cabeza">
+          <p class="tipo">Cuota mensual</p>
+          <h3>Google al día</h3>
+          <p class="precio">desde $1.000 <small>por mes</small></p>
+        </div>
+        <ul>
+          <li>Respuesta a todas tus reseñas en menos de 72 horas.</li>
+          <li>Horarios, precios y menú actualizados en la ficha y en la web.</li>
+          <li>Dos publicaciones por mes con tus novedades u ofertas.</li>
+          <li>Informe mensual: llamadas, pedidos de "cómo llegar" y visitas.</li>
+        </ul>
+      </article>
+
+      <article class="servicio">
+        <div class="cabeza">
+          <p class="tipo">Cuota mensual</p>
+          <h3>Presencia completa</h3>
+          <p class="precio">desde $3.000 <small>por mes</small></p>
+        </div>
+        <ul>
+          <li>Todo lo de Google al día.</li>
+          <li>Ocho piezas de diseño por mes para tus redes.</li>
+          <li>Tu catálogo de WhatsApp armado y actualizado.</li>
+        </ul>
+      </article>
+    </div>
+  </section>
+
+  <section class="tienda360" id="tienda360">
+    <div class="contenedor">
+      <div>
+        <span class="etiqueta">Nuevo</span>
+        <h2>Tiendas 360 para emprendimientos sin local.</h2>
+        <p>Una sala virtual donde tus clientes recorren, tocan tus productos, arman el carrito y te hacen el pedido directo por WhatsApp.</p>
+      </div>
+      <div class="accion"><a class="boton claro" href="tienda360/">Entrá a la tienda demo</a></div>
+    </div>
+  </section>
+
+  <section class="seccion" id="como" style="padding-top:0">
+    <div class="contenedor">
+      <h2>Cómo trabajo</h2>
+      <div class="pasos">
+        <div class="paso">
+          <h3>Diagnóstico gratis</h3>
+          <p>Te muestro en tu celular cómo aparece hoy tu comercio y qué aparece en su lugar.</p>
+        </div>
+        <div class="paso">
+          <h3>Visita al local</h3>
+          <p>Una hora y media para verificar la ficha y sacar las fotos, con vos presente.</p>
+        </div>
+        <div class="paso">
+          <h3>Armado</h3>
+          <p>Preparo la ficha, la web y el QR. Te los muestro antes de publicar.</p>
+        </div>
+        <div class="paso">
+          <h3>Informe a los 30 días</h3>
+          <p>Vemos juntos cuántas personas te encontraron, te llamaron o pidieron cómo llegar.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="promesa">
+    <div class="contenedor">
+      <h2>Tu ficha es tuya, siempre.</h2>
+      <p>Todo queda a nombre de tu comercio, en tu propia cuenta de Google. Yo trabajo como administrador, y si algún día dejamos de trabajar juntos, conservás todo lo que armamos.</p>
+    </div>
+  </section>
+</main>
+
+<footer class="contacto" id="contacto">
+  <div class="contenedor">
+    <h2>Hablemos de tu comercio.</h2>
+    <p>Escribime por WhatsApp y coordinamos el diagnóstico. Respondo todos los mensajes en el día.</p>
+    <a class="boton claro" href="https://wa.me/59891782945?text=Hola%2C%20quiero%20un%20diagn%C3%B3stico%20de%20mi%20comercio" target="_blank" rel="noopener">Escribime por WhatsApp</a>
+    <div class="datos">
+      <span>Durazno y alrededores</span>
+      <a href="mailto:quefacha.durazno@gmail.com">quefacha.durazno@gmail.com</a>
+    </div>
+    <div class="pie">
+      <strong>qué facha</strong>
+      <span>Presencia en Google y web para comercios de Durazno</span>
+    </div>
+  </div>
+</footer>
+
+<script>
+  (function () {
+    var cont = document.getElementById('franjas');
+    var html = '';
+    for (var i = 0; i < 60; i++) html += '<span></span>';
+    cont.innerHTML = html;
+  })();
+</script>
+</body>
+</html>
