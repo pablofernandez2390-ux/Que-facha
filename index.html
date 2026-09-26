@@ -151,6 +151,15 @@
   .promesa h2 { font-size: clamp(28px, 4.5vw, 40px); letter-spacing: -0.02em; line-height: 1.15; max-width: 22ch; margin-bottom: 16px; }
   .promesa p { max-width: 56ch; color: var(--texto-2); }
 
+  /* Preguntas frecuentes */
+  .faq details { border-top: 2px solid var(--hueso-2); }
+  .faq details:last-of-type { border-bottom: 2px solid var(--hueso-2); }
+  .faq summary { cursor: pointer; list-style: none; padding: 20px 40px 20px 0; font-size: 20px; font-weight: 500; position: relative; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); font-size: 28px; font-weight: 400; color: var(--cuero); transition: transform .2s; }
+  .faq details[open] summary::after { transform: translateY(-50%) rotate(45deg); }
+  .faq details p { color: var(--texto-2); padding: 0 0 22px; max-width: 60ch; }
+
   /* Contacto */
   .contacto { background: var(--grafito); color: var(--hueso); padding: 88px 0 56px; }
   .contacto h2 { font-size: clamp(34px, 6vw, 60px); letter-spacing: -0.03em; line-height: 1.05; max-width: 14ch; margin-bottom: 20px; }
@@ -310,6 +319,48 @@
     <div class="contenedor">
       <h2>Tu ficha es tuya, siempre.</h2>
       <p>Todo queda a nombre de tu comercio, en tu propia cuenta de Google. Yo trabajo como administrador, y si algún día dejamos de trabajar juntos, conservás todo lo que armamos.</p>
+    </div>
+  </section>
+
+  <section class="seccion faq" id="preguntas">
+    <div class="contenedor">
+      <h2>Preguntas frecuentes</h2>
+      <details>
+        <summary>¿Cuánto cuesta?</summary>
+        <p>Depende de lo que necesite tu negocio: cuántos productos tenés y quién saca las fotos. Los precios "desde" de arriba son una referencia. Después del diagnóstico gratis te paso un precio cerrado, sin sorpresas.</p>
+      </details>
+      <details>
+        <summary>¿Me garantizan más ventas?</summary>
+        <p>No puedo prometer ventas, y desconfiá de quien lo haga. Lo que sí te garantizo es que tus clientes te encuentren y te pidan más fácil. Difundir y vender sigue siendo tuyo, y vas a poder ver cuántas personas te encontraron y cuántos pedidos te llegaron.</p>
+      </details>
+      <details>
+        <summary>¿De quién es la ficha o la tienda?</summary>
+        <p>Tuya. La ficha de Google, la cuenta, la tienda y su código quedan a tu nombre. Yo trabajo como colaborador y podés sacarme el acceso cuando quieras.</p>
+      </details>
+      <details>
+        <summary>¿Qué pasa si dejo de pagar el mantenimiento?</summary>
+        <p>Todo sigue siendo tuyo y funcionando. Solo dejo de actualizarlo.</p>
+      </details>
+      <details>
+        <summary>¿Tengo que saber de computación?</summary>
+        <p>No. Podés cambiar precios, ofertas y stock desde un panel simple, como escribir en una pizarra. Y si no querés ocuparte, me mandás las novedades por WhatsApp y yo las cargo.</p>
+      </details>
+      <details>
+        <summary>¿Quién saca las fotos de los productos?</summary>
+        <p>Las podés sacar vos o las saco yo, con buena luz y fondo blanco. Es un servicio aparte que se cotiza según la cantidad de productos.</p>
+      </details>
+      <details>
+        <summary>¿Las tiendas funcionan en cualquier celular?</summary>
+        <p>La tienda 360 funciona en casi todos los teléfonos. La tienda 3D está pensada para teléfonos de gama media y alta. Te lo aclaro antes de elegir.</p>
+      </details>
+      <details>
+        <summary>¿Cuánto tarda?</summary>
+        <p>Te doy un plazo concreto al confirmar el trabajo. La ficha de Google depende además de la verificación de Google, que puede tardar algunos días.</p>
+      </details>
+      <details>
+        <summary>¿Cómo se paga?</summary>
+        <p>La mitad al empezar y la mitad al entregar. El mantenimiento se paga por mes, por adelantado.</p>
+      </details>
     </div>
   </section>
 </main>
