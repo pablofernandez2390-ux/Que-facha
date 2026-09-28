@@ -67,6 +67,19 @@
   .descartar { background: none; border: 0; color: var(--texto-2); text-decoration: underline; font-size: 14px; margin: 4px 0 16px; }
   .ingreso { background: #fff; border-radius: 16px; padding: 22px; text-align: center; border: 1px solid var(--hueso-2); }
   .ingreso p { color: var(--texto-2); margin: 6px 0 14px; font-size: 15px; }
+  .temas { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .tema { border: 3px solid transparent; border-radius: 16px; background: #fff; padding: 0 0 10px; overflow: hidden; text-align: left; box-shadow: 0 0 0 1px var(--hueso-2); }
+  .tema.activo { border-color: var(--grafito); }
+  .tema .mini-toldo { display: flex; height: 28px; overflow: hidden; }
+  .tema .mini-toldo i { flex: 0 0 22px; height: 22px; border-radius: 0 0 11px 11px; }
+  .tema .muestras { display: flex; gap: 4px; padding: 8px 10px 4px; }
+  .tema .muestras b { width: 22px; height: 22px; border-radius: 6px; border: 1px solid rgba(0,0,0,.08); }
+  .tema span { display: block; padding: 0 10px; font-weight: 700; font-size: 15px; }
+  .tema small { display: block; padding: 0 10px; font-size: 12px; color: var(--piedra); }
+  .stickers { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; align-items: center; }
+  .stk { width: 40px; height: 40px; border-radius: 10px; border: 2px solid var(--hueso-2); background: #fff; padding: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--piedra); }
+  .stk svg { width: 100%; height: 100%; }
+  .stk[aria-pressed="true"] { border-color: var(--grafito); background: #F7F4EE; }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--cuero); outline-offset: 2px; }
 </style>
 </head>
@@ -89,6 +102,7 @@
     <div class="pestanas" role="tablist">
       <button class="pestana activa" data-tab="novedades">Novedades</button>
       <button class="pestana" data-tab="servicios">Servicios</button>
+      <button class="pestana" data-tab="tema">Tema</button>
     </div>
     <section data-panel="novedades">
       <button class="agregar" data-agregar="novedades">+ Nueva novedad</button>
@@ -100,6 +114,10 @@
       <div id="listaServicios"></div>
       <button class="agregar" data-agregar="servicios">+ Nuevo servicio</button>
     </section>
+    <section data-panel="tema" hidden>
+      <p class="ayuda" style="margin:0 0 12px">Cambia los colores de tu web para cada temporada. La tipografía y el logo no cambian.</p>
+      <div class="temas" id="listaTemas"></div>
+    </section>
     <button class="descartar" id="descartar">Descartar los cambios sin publicar</button>
   </div>
 </main>
@@ -107,6 +125,31 @@
 <div class="barra" id="barra" hidden><div class="cont"><span class="estado" id="estado">Sin cambios.</span><button class="publicar" id="publicar" disabled>Publicar cambios</button></div></div>
 
 <script>
+window.QF_TEMAS = {
+  normal:    { nombre: 'qué facha', g: '#2E2F33', g2: '#3B3C41', g3: '#45464B', h: '#F2EEE6', h2: '#E2DBCF', c: '#B0674A', co: '#8F4F37', s: '#C9C6BE' },
+  navidad:   { nombre: 'Navidad',   g: '#1F3A2E', g2: '#2A4A3B', g3: '#36594A', h: '#F5F0E6', h2: '#E6DCCB', c: '#B8322E', co: '#8E2522', s: '#CFD8CF' },
+  invierno:  { nombre: 'Invierno',  g: '#25303A', g2: '#313D49', g3: '#3D4A58', h: '#EEF2F5', h2: '#D6DEE5', c: '#4C7FA6', co: '#3A6384', s: '#C4CFD9' },
+  primavera: { nombre: 'Primavera', g: '#2F3A2E', g2: '#3B483A', g3: '#485646', h: '#F5F2E8', h2: '#E4E4D0', c: '#C2607A', co: '#9C4A60', s: '#D0D6C8' },
+  halloween: { nombre: 'Halloween', g: '#231E2B', g2: '#302939', g3: '#3C3446', h: '#F3ECE1', h2: '#E3D6C3', c: '#D46A1C', co: '#A85314', s: '#CFC6D6' }
+};
+window.qfAplicarTema = function (id) {
+  var t = QF_TEMAS[id] || QF_TEMAS.normal, r = document.documentElement.style;
+  r.setProperty('--grafito', t.g); r.setProperty('--grafito-2', t.g2); r.setProperty('--grafito-3', t.g3);
+  r.setProperty('--hueso', t.h); r.setProperty('--hueso-2', t.h2); r.setProperty('--cuero', t.c); r.setProperty('--cuero-osc', t.co); r.setProperty('--sub', t.s);
+  var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.g);
+  try { localStorage.setItem('qf-tema', QF_TEMAS[id] ? id : 'normal'); } catch (e) {}
+};
+window.QF_STICKERS = {
+  campanas: { nombre: 'Campanas', svg: '<svg viewBox="0 0 100 100"><g transform="rotate(-16 34 56)"><path d="M34 24c-14 0-20 11-20 25v14l-7 10h54l-7-10V49c0-14-6-25-20-25z" fill="#E3B23C"/><path d="M28 32c-5 4-7 10-7 18" stroke="#F6D77A" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="34" cy="79" r="6" fill="#B8872A"/></g><g transform="rotate(16 66 56)"><path d="M66 24c-14 0-20 11-20 25v14l-7 10h54l-7-10V49c0-14-6-25-20-25z" fill="#EBC152"/><circle cx="66" cy="79" r="6" fill="#B8872A"/></g><path d="M50 22c-8-11-24-11-24-2 0 8 16 7 24 2zm0 0c8-11 24-11 24-2 0 8-16 7-24 2z" fill="#C0392B"/><path d="M50 22l-10 20M50 22l10 20" stroke="#C0392B" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="22" r="6" fill="#A93226"/></svg>' },
+  copo:     { nombre: 'Copo de nieve', svg: '<svg viewBox="0 0 100 100"><g stroke="#6FA8D6" stroke-width="6" stroke-linecap="round" fill="none"><g id="qf-copo-b"><path d="M50 50V14M50 26l-9-8M50 26l9-8M50 38l-7-6M50 38l7-6"/></g><use href="#qf-copo-b" transform="rotate(60 50 50)"/><use href="#qf-copo-b" transform="rotate(120 50 50)"/><use href="#qf-copo-b" transform="rotate(180 50 50)"/><use href="#qf-copo-b" transform="rotate(240 50 50)"/><use href="#qf-copo-b" transform="rotate(300 50 50)"/></g><circle cx="50" cy="50" r="6" fill="#DCEBF7"/></svg>' },
+  flor:     { nombre: 'Flor', svg: '<svg viewBox="0 0 100 100"><g fill="#E58FA5"><circle cx="50" cy="26" r="16"/><circle cx="73" cy="43" r="16"/><circle cx="64" cy="70" r="16"/><circle cx="36" cy="70" r="16"/><circle cx="27" cy="43" r="16"/></g><g fill="#F2B3C3"><circle cx="50" cy="24" r="6"/><circle cx="72" cy="41" r="6"/></g><circle cx="50" cy="50" r="13" fill="#F2C94C"/><circle cx="46" cy="46" r="4" fill="#F7DC86"/></svg>' },
+  calabaza: { nombre: 'Calabaza', svg: '<svg viewBox="0 0 100 100"><path d="M50 26c2-8 6-12 12-13" stroke="#4E7A34" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="34" cy="58" rx="20" ry="26" fill="#D9731F"/><ellipse cx="66" cy="58" rx="20" ry="26" fill="#D9731F"/><ellipse cx="50" cy="58" rx="20" ry="28" fill="#E98A2E"/><path d="M36 50l8 8H32zM64 50l-8 8h12z" fill="#3A2415"/><path d="M34 68c6 8 26 8 32 0l-5 3-4-4-4 5-4-5-4 5-4-5-4 4z" fill="#3A2415"/></svg>' },
+  estrella: { nombre: 'Estrella', svg: '<svg viewBox="0 0 100 100"><path d="M50 8l12 27 29 3-22 20 7 29-26-15-26 15 7-29L9 38l29-3z" fill="#E8BD4B"/><path d="M50 22l7 17 18 2-14 12" stroke="#F6D77A" stroke-width="4" fill="none" stroke-linecap="round"/></svg>' },
+  regalo:   { nombre: 'Regalo', svg: '<svg viewBox="0 0 100 100"><rect x="18" y="40" width="64" height="48" rx="5" fill="#C0392B"/><rect x="14" y="30" width="72" height="16" rx="4" fill="#D64B3C"/><rect x="45" y="30" width="10" height="58" fill="#E8BD4B"/><path d="M50 30c-8-14-26-14-22-3 3 7 16 5 22 3zm0 0c8-14 26-14 22-3-3 7-16 5-22 3z" fill="#E8BD4B"/></svg>' },
+  corazon:  { nombre: 'Corazón', svg: '<svg viewBox="0 0 100 100"><path d="M50 86C20 64 10 48 10 34c0-12 9-21 20-21 9 0 15 5 20 12 5-7 11-12 20-12 11 0 20 9 20 21 0 14-10 30-40 52z" fill="#D64550"/><path d="M26 26c-5 2-8 7-8 12" stroke="#F08A93" stroke-width="5" fill="none" stroke-linecap="round"/></svg>' },
+  nuevo:    { nombre: '¡Nuevo!', svg: '<svg viewBox="0 0 100 100"><path d="M50 4l9 11 14-4 3 14 14 4-4 14 11 9-11 9 4 14-14 4-3 14-14-4-9 11-9-11-14 4-3-14-14-4 4-14L4 52l11-9-4-14 14-4 3-14 14 4z" fill="var(--cuero, #B0674A)"/><text x="50" y="57" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="700" font-size="15" fill="#fff">¡NUEVO!</text></svg>' }
+};
+
 /* =========================================================
    CONFIGURACIÓN — la misma en admin.html y en index.html
    Reglas sugeridas para la Realtime Database:
@@ -127,6 +170,7 @@ const CORREO_DUENO = 'quefacha.durazno@gmail.com';
 
 /* Contenido inicial: el que hoy está fijo en la web */
 const INICIAL = {
+  tema: { id: 'normal' },
   novedades: [],
   servicios: [
     { id: 's1', tipo: 'Pago único', titulo: 'Aparecé en Google', precio: 3500, unidad: 'una sola vez', destacado: true, visible: true, img: '',
@@ -148,7 +192,8 @@ let datos = JSON.parse(JSON.stringify(INICIAL)), publicado = null, fotoPara = nu
 function normalizar(d) {
   d = d || {};
   return {
-    novedades: lista(d.novedades).map(x => ({ id: String(x.id || nuevoId('n')), fecha: Number(x.fecha) || Date.now(), titulo: x.titulo || '', texto: x.texto || '', img: x.img || '', visible: x.visible !== false })),
+    tema: { id: QF_TEMAS[d.tema && d.tema.id] ? d.tema.id : 'normal' },
+    novedades: lista(d.novedades).map(x => ({ id: String(x.id || nuevoId('n')), fecha: Number(x.fecha) || Date.now(), titulo: x.titulo || '', texto: x.texto || '', img: x.img || '', visible: x.visible !== false, sticker: QF_STICKERS[x.sticker] ? x.sticker : '', esquina: x.esquina === 'izquierda' ? 'izquierda' : 'derecha' })),
     servicios: (lista(d.servicios).length ? lista(d.servicios) : INICIAL.servicios).map(x => ({ id: String(x.id || nuevoId('s')), tipo: x.tipo || '', titulo: x.titulo || '',
       precio: Number(x.precio) || 0, unidad: x.unidad || '', desc: x.desc || '', img: x.img || '', destacado: !!x.destacado, visible: x.visible !== false }))
   };
@@ -160,6 +205,9 @@ function dibujar() {
   $('listaNovedades').innerHTML = nov.length ? nov.map(x => `<div class="item" data-tipo="novedades" data-id="${x.id}">${foto(x, 'novedades')}<div>
     <input class="campo titulo" data-c="titulo" value="${esc(x.titulo)}" placeholder="Título de la novedad" maxlength="70">
     <textarea class="campo" data-c="texto" placeholder="Texto" maxlength="400">${esc(x.texto)}</textarea>
+    <div class="ayuda" style="margin:0">Sticker en la esquina</div>
+    <div class="stickers"><button class="stk" data-stk="" aria-pressed="${!x.sticker}">Ninguno</button>${Object.keys(QF_STICKERS).map(k => `<button class="stk" data-stk="${k}" aria-pressed="${x.sticker === k}" title="${QF_STICKERS[k].nombre}" aria-label="${QF_STICKERS[k].nombre}">${QF_STICKERS[k].svg}</button>`).join('')}
+      ${x.sticker ? `<button class="chip" data-acc="esquina">${x.esquina === 'izquierda' ? '↖ Izquierda' : 'Derecha ↗'}</button>` : ''}</div>
     <div class="botones"><span class="ayuda" style="margin:0">${new Date(x.fecha).toLocaleDateString('es-UY', { day: 'numeric', month: 'long', year: 'numeric' })}</span>
       <button class="chip oculto" data-acc="visible" aria-pressed="${x.visible}">${x.visible ? 'Visible' : 'Oculta'}</button>
       <button class="borrar" data-acc="borrar">Eliminar</button></div></div></div>`).join('') : '<p class="vacio">Todavía no hay novedades.</p>';
@@ -176,18 +224,26 @@ function dibujar() {
       <button class="chip" data-acc="destacado" aria-pressed="${x.destacado}">★ Destacado</button>
       <button class="chip oculto" data-acc="visible" aria-pressed="${x.visible}">${x.visible ? 'Visible' : 'Oculto'}</button>
       <button class="borrar" data-acc="borrar">Eliminar</button></div></div></div>`).join('');
+  $('listaTemas').innerHTML = Object.keys(QF_TEMAS).map(k => { const t = QF_TEMAS[k];
+    return `<button class="tema${datos.tema.id === k ? ' activo' : ''}" data-tema="${k}" aria-pressed="${datos.tema.id === k}">
+      <div class="mini-toldo" style="border-top:6px solid ${t.g}">${Array.from({ length: 8 }, (_, i) => `<i style="background:${i % 2 ? t.h2 : t.c}"></i>`).join('')}</div>
+      <div class="muestras"><b style="background:${t.g}"></b><b style="background:${t.h}"></b><b style="background:${t.c}"></b></div>
+      <span>${t.nombre}</span><small>${datos.tema.id === k ? 'Elegido' : 'Tocá para elegir'}</small></button>`; }).join('');
   revisar();
 }
 const buscar = el => { const it = el.closest('.item'); return { tipo: it.dataset.tipo, x: datos[it.dataset.tipo].find(z => z.id === it.dataset.id) }; };
 document.addEventListener('input', e => { const c = e.target.dataset.c; if (!c) return; const { x } = buscar(e.target); x[c] = c === 'precio' ? Number(e.target.value) || 0 : e.target.value; revisar(); });
 document.addEventListener('click', e => {
-  const t = e.target.closest('[data-acc],[data-agregar],[data-foto],[data-quitarfoto],[data-tab]'); if (!t) return;
+  const tm = e.target.closest('[data-tema]'); if (tm) { datos.tema = { id: tm.dataset.tema }; dibujar(); return; }
+  const t = e.target.closest('[data-acc],[data-agregar],[data-foto],[data-quitarfoto],[data-tab],[data-stk]'); if (!t) return;
   if (t.dataset.tab) { document.querySelectorAll('.pestana').forEach(p => p.classList.toggle('activa', p === t)); document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== t.dataset.tab); return; }
-  if (t.dataset.agregar === 'novedades') { datos.novedades.push({ id: nuevoId('n'), fecha: Date.now(), titulo: '', texto: '', img: '', visible: true }); dibujar(); document.querySelector('#listaNovedades .campo').focus(); return; }
+  if (t.dataset.agregar === 'novedades') { datos.novedades.push({ id: nuevoId('n'), fecha: Date.now(), titulo: '', texto: '', img: '', visible: true, sticker: '', esquina: 'derecha' }); dibujar(); document.querySelector('#listaNovedades .campo').focus(); return; }
   if (t.dataset.agregar === 'servicios') { datos.servicios.push({ id: nuevoId('s'), tipo: 'Cuota mensual', titulo: '', precio: 0, unidad: 'por mes', desc: '', img: '', destacado: false, visible: true }); dibujar(); return; }
   if (t.dataset.foto) { fotoPara = t.dataset.foto; $('archivo').value = ''; $('archivo').click(); return; }
   if (t.dataset.quitarfoto) { const [tipo, id] = t.dataset.quitarfoto.split(':'); datos[tipo].find(z => z.id === id).img = ''; dibujar(); return; }
   const { tipo, x } = buscar(t), arr = datos[tipo], i = arr.indexOf(x);
+  if (t.dataset.stk !== undefined) { x.sticker = t.dataset.stk; dibujar(); return; }
+  if (t.dataset.acc === 'esquina') { x.esquina = x.esquina === 'izquierda' ? 'derecha' : 'izquierda'; dibujar(); return; }
   if (t.dataset.acc === 'visible') x.visible = !x.visible;
   if (t.dataset.acc === 'destacado') { const val = !x.destacado; arr.forEach(z => z.destacado = false); x.destacado = val; }
   if (t.dataset.acc === 'subir' && i > 0) [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];

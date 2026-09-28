@@ -10,6 +10,34 @@
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <link rel="manifest" href="manifest.webmanifest">
 <meta name="theme-color" content="#2E2F33">
+<script>
+/* Temas de temporada y stickers (los mismos que en admin.html) */
+window.QF_TEMAS = {
+  normal:    { nombre: 'qué facha', g: '#2E2F33', g2: '#3B3C41', g3: '#45464B', h: '#F2EEE6', h2: '#E2DBCF', c: '#B0674A', co: '#8F4F37', s: '#C9C6BE' },
+  navidad:   { nombre: 'Navidad',   g: '#1F3A2E', g2: '#2A4A3B', g3: '#36594A', h: '#F5F0E6', h2: '#E6DCCB', c: '#B8322E', co: '#8E2522', s: '#CFD8CF' },
+  invierno:  { nombre: 'Invierno',  g: '#25303A', g2: '#313D49', g3: '#3D4A58', h: '#EEF2F5', h2: '#D6DEE5', c: '#4C7FA6', co: '#3A6384', s: '#C4CFD9' },
+  primavera: { nombre: 'Primavera', g: '#2F3A2E', g2: '#3B483A', g3: '#485646', h: '#F5F2E8', h2: '#E4E4D0', c: '#C2607A', co: '#9C4A60', s: '#D0D6C8' },
+  halloween: { nombre: 'Halloween', g: '#231E2B', g2: '#302939', g3: '#3C3446', h: '#F3ECE1', h2: '#E3D6C3', c: '#D46A1C', co: '#A85314', s: '#CFC6D6' }
+};
+window.qfAplicarTema = function (id) {
+  var t = QF_TEMAS[id] || QF_TEMAS.normal, r = document.documentElement.style;
+  r.setProperty('--grafito', t.g); r.setProperty('--grafito-2', t.g2); r.setProperty('--grafito-3', t.g3);
+  r.setProperty('--hueso', t.h); r.setProperty('--hueso-2', t.h2); r.setProperty('--cuero', t.c); r.setProperty('--cuero-osc', t.co); r.setProperty('--sub', t.s);
+  var m = document.querySelector('meta[name="theme-color"]'); if (m) m.setAttribute('content', t.g);
+  try { localStorage.setItem('qf-tema', QF_TEMAS[id] ? id : 'normal'); } catch (e) {}
+};
+window.QF_STICKERS = {
+  campanas: { nombre: 'Campanas', svg: '<svg viewBox="0 0 100 100"><g transform="rotate(-16 34 56)"><path d="M34 24c-14 0-20 11-20 25v14l-7 10h54l-7-10V49c0-14-6-25-20-25z" fill="#E3B23C"/><path d="M28 32c-5 4-7 10-7 18" stroke="#F6D77A" stroke-width="5" fill="none" stroke-linecap="round"/><circle cx="34" cy="79" r="6" fill="#B8872A"/></g><g transform="rotate(16 66 56)"><path d="M66 24c-14 0-20 11-20 25v14l-7 10h54l-7-10V49c0-14-6-25-20-25z" fill="#EBC152"/><circle cx="66" cy="79" r="6" fill="#B8872A"/></g><path d="M50 22c-8-11-24-11-24-2 0 8 16 7 24 2zm0 0c8-11 24-11 24-2 0 8-16 7-24 2z" fill="#C0392B"/><path d="M50 22l-10 20M50 22l10 20" stroke="#C0392B" stroke-width="6" stroke-linecap="round"/><circle cx="50" cy="22" r="6" fill="#A93226"/></svg>' },
+  copo:     { nombre: 'Copo de nieve', svg: '<svg viewBox="0 0 100 100"><g stroke="#6FA8D6" stroke-width="6" stroke-linecap="round" fill="none"><g id="qf-copo-b"><path d="M50 50V14M50 26l-9-8M50 26l9-8M50 38l-7-6M50 38l7-6"/></g><use href="#qf-copo-b" transform="rotate(60 50 50)"/><use href="#qf-copo-b" transform="rotate(120 50 50)"/><use href="#qf-copo-b" transform="rotate(180 50 50)"/><use href="#qf-copo-b" transform="rotate(240 50 50)"/><use href="#qf-copo-b" transform="rotate(300 50 50)"/></g><circle cx="50" cy="50" r="6" fill="#DCEBF7"/></svg>' },
+  flor:     { nombre: 'Flor', svg: '<svg viewBox="0 0 100 100"><g fill="#E58FA5"><circle cx="50" cy="26" r="16"/><circle cx="73" cy="43" r="16"/><circle cx="64" cy="70" r="16"/><circle cx="36" cy="70" r="16"/><circle cx="27" cy="43" r="16"/></g><g fill="#F2B3C3"><circle cx="50" cy="24" r="6"/><circle cx="72" cy="41" r="6"/></g><circle cx="50" cy="50" r="13" fill="#F2C94C"/><circle cx="46" cy="46" r="4" fill="#F7DC86"/></svg>' },
+  calabaza: { nombre: 'Calabaza', svg: '<svg viewBox="0 0 100 100"><path d="M50 26c2-8 6-12 12-13" stroke="#4E7A34" stroke-width="6" fill="none" stroke-linecap="round"/><ellipse cx="34" cy="58" rx="20" ry="26" fill="#D9731F"/><ellipse cx="66" cy="58" rx="20" ry="26" fill="#D9731F"/><ellipse cx="50" cy="58" rx="20" ry="28" fill="#E98A2E"/><path d="M36 50l8 8H32zM64 50l-8 8h12z" fill="#3A2415"/><path d="M34 68c6 8 26 8 32 0l-5 3-4-4-4 5-4-5-4 5-4-5-4 4z" fill="#3A2415"/></svg>' },
+  estrella: { nombre: 'Estrella', svg: '<svg viewBox="0 0 100 100"><path d="M50 8l12 27 29 3-22 20 7 29-26-15-26 15 7-29L9 38l29-3z" fill="#E8BD4B"/><path d="M50 22l7 17 18 2-14 12" stroke="#F6D77A" stroke-width="4" fill="none" stroke-linecap="round"/></svg>' },
+  regalo:   { nombre: 'Regalo', svg: '<svg viewBox="0 0 100 100"><rect x="18" y="40" width="64" height="48" rx="5" fill="#C0392B"/><rect x="14" y="30" width="72" height="16" rx="4" fill="#D64B3C"/><rect x="45" y="30" width="10" height="58" fill="#E8BD4B"/><path d="M50 30c-8-14-26-14-22-3 3 7 16 5 22 3zm0 0c8-14 26-14 22-3-3 7-16 5-22 3z" fill="#E8BD4B"/></svg>' },
+  corazon:  { nombre: 'Corazón', svg: '<svg viewBox="0 0 100 100"><path d="M50 86C20 64 10 48 10 34c0-12 9-21 20-21 9 0 15 5 20 12 5-7 11-12 20-12 11 0 20 9 20 21 0 14-10 30-40 52z" fill="#D64550"/><path d="M26 26c-5 2-8 7-8 12" stroke="#F08A93" stroke-width="5" fill="none" stroke-linecap="round"/></svg>' },
+  nuevo:    { nombre: '¡Nuevo!', svg: '<svg viewBox="0 0 100 100"><path d="M50 4l9 11 14-4 3 14 14 4-4 14 11 9-11 9 4 14-14 4-3 14-14-4-9 11-9-11-14 4-3-14-14-4 4-14L4 52l11-9-4-14 14-4 3-14 14 4z" fill="var(--cuero, #B0674A)"/><text x="50" y="57" text-anchor="middle" font-family="Bricolage Grotesque, system-ui, sans-serif" font-weight="700" font-size="15" fill="#fff">¡NUEVO!</text></svg>' }
+};
+try { qfAplicarTema(localStorage.getItem("qf-tema") || "normal"); } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
@@ -28,6 +56,9 @@
     --cuero-osc: #8F4F37;
     --piedra: #8A8780;
     --texto-2: #58595E;
+    --grafito-2: #3B3C41;
+    --grafito-3: #45464B;
+    --sub: #C9C6BE;
     --ancho: 1040px;
     --franja: 64px;
   }
@@ -76,7 +107,7 @@
     text-decoration: none; font-weight: 500; font-size: 18px;
     padding: 16px 26px; border-radius: 999px;
   }
-  .boton:hover { background: #1F2023; }
+  .boton:hover { filter: brightness(.82); }
   .boton:focus-visible, a:focus-visible { outline: 3px solid var(--cuero); outline-offset: 3px; }
   .boton.claro { background: var(--hueso); color: var(--grafito); }
   .boton.claro:hover { background: #fff; }
@@ -91,7 +122,7 @@
   }
   .buscador svg { flex: 0 0 22px; }
   .prueba h2 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; }
-  .prueba p { color: #C9C6BE; max-width: 52ch; margin-top: 16px; }
+  .prueba p { color: var(--sub); max-width: 52ch; margin-top: 16px; }
 
   /* Servicios */
   .seccion { padding: 88px 0; }
@@ -128,8 +159,14 @@
   .novedades { padding-bottom: 20px; }
   .novedades-grid { display: grid; gap: 16px; }
   @media (min-width: 760px) { .novedades-grid { grid-template-columns: repeat(3, 1fr); } }
-  .novedad { background: #fff; border: 1px solid var(--hueso-2); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
-  .novedad img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+  .novedad { position: relative; background: #fff; border: 1px solid var(--hueso-2); border-radius: 18px; display: flex; flex-direction: column; }
+  .novedad > img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; border-radius: 17px 17px 0 0; }
+  .sticker { position: absolute; top: -34px; width: 78px; height: 78px; z-index: 2; pointer-events: none;
+    filter: drop-shadow(2px 0 0 #fff) drop-shadow(-2px 0 0 #fff) drop-shadow(0 2px 0 #fff) drop-shadow(0 -2px 0 #fff) drop-shadow(0 4px 5px rgba(0,0,0,.22)); }
+  .sticker.derecha { right: -14px; transform: rotate(10deg); }
+  .sticker.izquierda { left: -14px; transform: rotate(-10deg); }
+  .sticker svg { width: 100%; height: 100%; }
+  .novedad.stk-izq:not(.con-img) .cuerpo { padding-top: 38px; }
   .novedad .cuerpo { padding: 18px 20px 20px; }
   .novedad time { font-size: 13px; color: var(--cuero-osc); font-weight: 500; }
   .novedad h3 { font-size: 22px; letter-spacing: -0.01em; line-height: 1.2; margin: 4px 0 8px; }
@@ -141,11 +178,11 @@
   .tienda360 .contenedor { display: grid; gap: 28px; align-items: center; }
   .tienda360 .etiqueta { display: inline-block; background: var(--cuero); color: #fff; font-size: 14px; font-weight: 500; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
   .tienda360 h2 { font-size: clamp(30px, 5vw, 46px); line-height: 1.1; letter-spacing: -0.02em; max-width: 18ch; }
-  .tienda360 p { color: #C9C6BE; max-width: 50ch; margin-top: 14px; }
+  .tienda360 p { color: var(--sub); max-width: 50ch; margin-top: 14px; }
   @media (min-width: 760px) { .tienda360 .contenedor { grid-template-columns: 1.4fr 1fr; } .tienda360 .accion { justify-self: end; } }
   .tienda360 .contenedor.apilado { grid-template-columns: 1fr; }
   .tiendas { display: grid; gap: 16px; }
-  .tienda-card { background: #3B3C41; border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
+  .tienda-card { background: var(--grafito-2); border-radius: 18px; padding: 24px; display: flex; flex-direction: column; gap: 8px; }
   .tienda-card h3 { font-size: 24px; letter-spacing: -0.01em; }
   .tienda360 .tienda-card p { margin-top: 0; }
   .tienda360 .tienda-card .nota { font-size: 14px; color: #A9A6A0; }
@@ -182,10 +219,10 @@
   /* Contacto */
   .contacto { background: var(--grafito); color: var(--hueso); padding: 88px 0 56px; }
   .contacto h2 { font-size: clamp(34px, 6vw, 60px); letter-spacing: -0.03em; line-height: 1.05; max-width: 14ch; margin-bottom: 20px; }
-  .contacto p { color: #C9C6BE; max-width: 48ch; margin-bottom: 32px; }
-  .datos { margin-top: 48px; display: grid; gap: 8px; color: #C9C6BE; font-size: 16px; }
+  .contacto p { color: var(--sub); max-width: 48ch; margin-bottom: 32px; }
+  .datos { margin-top: 48px; display: grid; gap: 8px; color: var(--sub); font-size: 16px; }
   .pie {
-    margin-top: 64px; padding-top: 24px; border-top: 1px solid #45464B;
+    margin-top: 64px; padding-top: 24px; border-top: 1px solid var(--grafito-3);
     display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-size: 15px; color: var(--piedra);
   }
   .pie strong { color: var(--hueso); }
@@ -454,10 +491,11 @@ const RUTA_SITIO = 'sitios/quefacha';
         </article>`).join('');
       document.getElementById('tituloServicios').textContent = (NUM[serv.length] || 'Formas') + ' de trabajar juntos';
     }
+    qfAplicarTema(d.tema && d.tema.id);
     const nov = lista(d.novedades).filter(x => x.visible !== false).sort((a, b) => (b.fecha || 0) - (a.fecha || 0)).slice(0, 3);
     document.getElementById('novedades').hidden = !nov.length;
     document.getElementById('listaNovedades').innerHTML = nov.map(x => `
-      <article class="novedad">${x.img ? `<img src="${esc(x.img)}" alt="">` : ''}
+      <article class="novedad${QF_STICKERS[x.sticker] && x.esquina === 'izquierda' ? ' stk-izq' : ''}${x.img ? ' con-img' : ''}">${QF_STICKERS[x.sticker] ? `<span class="sticker ${x.esquina === 'izquierda' ? 'izquierda' : 'derecha'}" aria-hidden="true">${QF_STICKERS[x.sticker].svg}</span>` : ''}${x.img ? `<img src="${esc(x.img)}" alt="">` : ''}
         <div class="cuerpo"><time>${new Date(x.fecha || Date.now()).toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}</time>
         <h3>${esc(x.titulo)}</h3><p>${esc(x.texto)}</p></div></article>`).join('');
   }
