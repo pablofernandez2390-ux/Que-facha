@@ -121,6 +121,20 @@
     .servicio .cabeza { grid-row: span 2; }
   }
 
+  .servicio .foto-serv { width: 100%; max-width: 320px; border-radius: 14px; margin-top: 14px; display: block; }
+  .servicio .desc-serv { color: var(--texto-2); }
+
+  /* Novedades (se cargan desde el Panel Administrador) */
+  .novedades { padding-bottom: 20px; }
+  .novedades-grid { display: grid; gap: 16px; }
+  @media (min-width: 760px) { .novedades-grid { grid-template-columns: repeat(3, 1fr); } }
+  .novedad { background: #fff; border: 1px solid var(--hueso-2); border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
+  .novedad img { width: 100%; aspect-ratio: 16 / 10; object-fit: cover; display: block; }
+  .novedad .cuerpo { padding: 18px 20px 20px; }
+  .novedad time { font-size: 13px; color: var(--cuero-osc); font-weight: 500; }
+  .novedad h3 { font-size: 22px; letter-spacing: -0.01em; line-height: 1.2; margin: 4px 0 8px; }
+  .novedad p { color: var(--texto-2); font-size: 16px; white-space: pre-line; }
+
 
   /* Tienda 360 */
   .tienda360 { background: var(--grafito); color: var(--hueso); padding: 72px 0; }
@@ -223,9 +237,17 @@
     </div>
   </section>
 
+  <section class="seccion novedades" id="novedades" hidden>
+    <div class="contenedor">
+      <h2>Novedades</h2>
+      <div class="novedades-grid" id="listaNovedades"></div>
+    </div>
+  </section>
+
   <section class="seccion" id="servicios">
     <div class="contenedor">
-      <h2>Tres formas de trabajar juntos</h2>
+      <h2 id="tituloServicios">Tres formas de trabajar juntos</h2>
+      <div id="listaServicios">
 
       <article class="servicio destacado">
         <div class="cabeza">
@@ -269,6 +291,7 @@
           <li>Tu catálogo de WhatsApp armado y actualizado.</li>
         </ul>
       </article>
+      </div>
     </div>
   </section>
 
@@ -394,6 +417,58 @@
     cont.innerHTML = html;
   })();
 </script>
-<script>if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');</script>
+<script>
+/* =========================================================
+   CONTENIDO EDITABLE desde el Panel Administrador (admin.html)
+   Si Firebase no responde, la página muestra el contenido fijo de arriba.
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDd_-6HZlvoZh-pK0mnzuHrcEb7bW9Cc2o",
+  authDomain: "que-facha.firebaseapp.com",
+  databaseURL: "https://que-facha-default-rtdb.firebaseio.com",
+  projectId: "que-facha",
+  storageBucket: "que-facha.firebasestorage.app",
+  messagingSenderId: "1028320902009",
+  appId: "1:1028320902009:web:0d3b62564ab006c6e00da8"
+};
+const RUTA_SITIO = 'sitios/quefacha';
+(function () {
+  if (!FIREBASE_CONFIG) return;
+  const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const precio = n => '$' + Math.round(Number(n) || 0).toLocaleString('es-UY');
+  const NUM = ['', 'Una forma', 'Dos formas', 'Tres formas', 'Cuatro formas', 'Cinco formas', 'Seis formas'];
+  const lista = v => !v ? [] : Array.isArray(v) ? v.filter(Boolean) : Object.values(v).filter(Boolean);
+  function pintar(d) {
+    if (!d) return;
+    const serv = lista(d.servicios).filter(x => x.visible !== false);
+    if (serv.length) {
+      document.getElementById('listaServicios').innerHTML = serv.map(x => `
+        <article class="servicio${x.destacado ? ' destacado' : ''}">
+          <div class="cabeza">
+            <p class="tipo">${esc(x.tipo)}</p>
+            <h3>${esc(x.titulo)}</h3>
+            ${Number(x.precio) > 0 ? `<p class="precio">desde ${precio(x.precio)} <small>${esc(x.unidad)}</small></p>` : ''}
+            ${x.img ? `<img class="foto-serv" src="${esc(x.img)}" alt="">` : ''}
+          </div>
+          <ul>${String(x.desc || '').split('\n').map(l => l.trim()).filter(Boolean).map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+        </article>`).join('');
+      document.getElementById('tituloServicios').textContent = (NUM[serv.length] || 'Formas') + ' de trabajar juntos';
+    }
+    const nov = lista(d.novedades).filter(x => x.visible !== false).sort((a, b) => (b.fecha || 0) - (a.fecha || 0)).slice(0, 3);
+    document.getElementById('novedades').hidden = !nov.length;
+    document.getElementById('listaNovedades').innerHTML = nov.map(x => `
+      <article class="novedad">${x.img ? `<img src="${esc(x.img)}" alt="">` : ''}
+        <div class="cuerpo"><time>${new Date(x.fecha || Date.now()).toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}</time>
+        <h3>${esc(x.titulo)}</h3><p>${esc(x.texto)}</p></div></article>`).join('');
+  }
+  const cargar = src => new Promise((ok, mal) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = mal; document.head.appendChild(s); });
+  const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+  cargar(base + 'firebase-app-compat.js').then(() => cargar(base + 'firebase-database-compat.js')).then(() => {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.database().ref(RUTA_SITIO).on('value', s => pintar(s.val()));
+  }).catch(() => {});
+})();
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+</script>
 </body>
 </html>
