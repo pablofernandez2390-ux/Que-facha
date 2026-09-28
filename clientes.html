@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Clientes — qué facha</title>
+<link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#2E2F33">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,700&display=swap" rel="stylesheet">
+<style>
+  :root { --grafito: #2E2F33; --hueso: #F2EEE6; --hueso-2: #E2DBCF; --cuero: #B0674A; --cuero-osc: #8F4F37; --piedra: #8A8780;
+    --texto-2: #58595E; --rojo: #C8372D; --verde: #3D7A4E; --fuente: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--fuente); background: var(--hueso); color: var(--grafito); font-size: 16px; line-height: 1.45; padding-bottom: 40px; }
+  button, input, select, textarea { font-family: inherit; font-size: inherit; color: inherit; }
+  button { cursor: pointer; }
+  [hidden] { display: none !important; }
+  .toldo { display: flex; overflow: hidden; border-top: 10px solid var(--grafito); height: 58px; }
+  .toldo span { flex: 0 0 50px; height: 38px; border-radius: 0 0 25px 25px; background: var(--cuero); }
+  .toldo span:nth-child(even) { background: var(--hueso-2); }
+  .cont { max-width: 720px; margin: 0 auto; padding: 0 16px; }
+  .cabeza { display: flex; justify-content: space-between; align-items: center; gap: 10px; margin: 6px 0; flex-wrap: wrap; }
+  .marca { font-weight: 700; font-size: 22px; letter-spacing: -0.02em; }
+  h1 { font-size: clamp(30px, 7vw, 40px); letter-spacing: -0.03em; line-height: 1.05; margin-top: 8px; }
+  .bajada { color: var(--texto-2); margin: 6px 0 12px; font-size: 15px; }
+  .sesion { font-size: 14px; color: var(--texto-2); margin-bottom: 12px; }
+  .sesion button { background: none; border: 0; text-decoration: underline; font-size: 14px; }
+  .aviso { background: var(--grafito); color: var(--hueso); border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; }
+  .pestanas { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .pestana { border: 2px solid var(--hueso-2); background: #fff; border-radius: 999px; padding: 8px 15px; font-weight: 600; font-size: 15px; }
+  .pestana.activa { background: var(--grafito); border-color: var(--grafito); color: var(--hueso); }
+  .caja { background: #fff; border: 1px solid var(--hueso-2); border-radius: 16px; padding: 16px; margin-bottom: 12px; }
+  .caja h2 { font-size: 19px; letter-spacing: -0.01em; margin-bottom: 10px; }
+  .fila { display: grid; gap: 10px; }
+  @media (min-width: 560px) { .fila.dos { grid-template-columns: 1fr 1fr; } .fila.tres { grid-template-columns: 1fr 1fr 1fr; } }
+  label.campo { display: block; font-size: 13px; color: var(--texto-2); font-weight: 500; }
+  label.campo input, label.campo select, label.campo textarea { display: block; width: 100%; margin-top: 4px; border: 2px solid var(--hueso-2); border-radius: 10px; padding: 9px 11px; background: #fff; font-size: 16px; color: var(--grafito); }
+  label.campo textarea { min-height: 80px; resize: vertical; }
+  label.campo input:focus, label.campo select:focus, label.campo textarea:focus { outline: none; border-color: var(--grafito); }
+  h2.req::after { content: " *"; color: var(--cuero); }
+  .ast { color: var(--cuero); font-style: normal; }
+  .mal input, .mal textarea { border-color: var(--rojo) !important; }
+  .nota { font-size: 12px; color: var(--piedra); margin-top: 3px; }
+  .nota.error { color: var(--rojo); font-weight: 600; }
+  .checks { display: grid; gap: 8px; }
+  .check { display: flex; gap: 10px; align-items: flex-start; font-size: 15px; }
+  .check input { width: 20px; height: 20px; margin-top: 2px; accent-color: var(--grafito); flex: none; }
+  .resumen { background: var(--hueso); border-radius: 12px; padding: 10px 12px; font-size: 15px; margin-top: 10px; display: grid; gap: 2px; }
+  .resumen b { font-size: 17px; }
+  .btn { border: 0; background: var(--grafito); color: var(--hueso); border-radius: 12px; padding: 12px 16px; font-weight: 700; }
+  .btn.sec { background: #fff; color: var(--grafito); border: 2px solid var(--grafito); }
+  .btn.cuero { background: var(--cuero); }
+  .btn:disabled { opacity: .45; cursor: default; }
+  .acciones { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 16px; }
+  .buscar { width: 100%; border: 2px solid var(--hueso-2); border-radius: 12px; padding: 11px 13px; background: #fff; margin-bottom: 12px; }
+  .cliente { background: #fff; border: 1px solid var(--hueso-2); border-radius: 14px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; gap: 10px; align-items: center; width: 100%; text-align: left; }
+  .cliente b { display: block; font-size: 16px; }
+  .cliente small { color: var(--texto-2); font-size: 13px; }
+  .estado { font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; white-space: nowrap; }
+  .e-prospecto { background: #EEE8DD; color: var(--texto-2); }
+  .e-negociacion { background: #FBEBD5; color: #8A5A12; }
+  .e-activo { background: #E1F0E4; color: var(--verde); }
+  .e-finalizado { background: #E6E6E6; color: #555; }
+  .vacio { text-align: center; color: var(--texto-2); padding: 24px; }
+  .faltan { background: #FBEBD5; border-radius: 12px; padding: 10px 12px; font-size: 14px; color: #6B4510; margin-bottom: 12px; }
+  .toast { position: fixed; left: 50%; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%) translateY(10px); background: var(--grafito); color: var(--hueso);
+    padding: 11px 18px; border-radius: 999px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; transition: .25s; z-index: 50; white-space: nowrap; }
+  .toast.visible { opacity: 1; transform: translateX(-50%); }
+  .ingreso { background: #fff; border-radius: 16px; padding: 22px; text-align: center; border: 1px solid var(--hueso-2); }
+  .ingreso p { color: var(--texto-2); margin: 6px 0 14px; font-size: 15px; }
+  button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 3px solid var(--cuero); outline-offset: 2px; }
+</style>
+</head>
+<body>
+<div class="toldo" id="toldo" aria-hidden="true"></div>
+<main class="cont">
+  <div class="cabeza"><span class="marca">qué facha</span></div>
+  <h1>Clientes</h1>
+  <p class="bajada">Fichas de clientes, contratos listos para firmar y la base en Excel.</p>
+  <p class="sesion" id="sesion" hidden>Sesión: <b id="correoSesion"></b> · <button id="salir">Cerrar sesión</button></p>
+  <div class="aviso" id="avisoDemo" hidden><b>Modo de prueba.</b> Los datos se guardan solo en este navegador. Con Firebase conectado, se guardan en tu cuenta y los ves desde cualquier dispositivo.</div>
+
+  <section class="ingreso" id="panelIngreso" hidden>
+    <h2>Ingresá para ver tus clientes</h2>
+    <p id="ayudaIngreso">Solo la cuenta de qué facha puede entrar.</p>
+    <button class="btn" id="ingresar">Ingresar con Google</button>
+  </section>
+
+  <div id="app" hidden>
+    <div class="pestanas" role="tablist">
+      <button class="pestana activa" data-tab="lista">Clientes</button>
+      <button class="pestana" data-tab="ficha" id="tabFicha">Ficha</button>
+      <button class="pestana" data-tab="misdatos">Mis datos</button>
+    </div>
+
+    <!-- LISTA -->
+    <section data-panel="lista">
+      <div class="acciones">
+        <button class="btn" id="nuevo">+ Nuevo cliente</button>
+        <button class="btn sec" id="excel">Descargar Excel</button>
+      </div>
+      <input class="buscar" id="buscar" type="search" placeholder="Buscar por nombre, negocio o teléfono…" aria-label="Buscar">
+      <div id="lista"></div>
+    </section>
+
+    <!-- FICHA -->
+    <section data-panel="ficha" hidden>
+      <form id="ficha" autocomplete="off" onsubmit="return false">
+        <div class="caja">
+          <h2>Estado</h2>
+          <label class="campo">Etapa
+            <select name="estado"><option value="prospecto">Prospecto</option><option value="negociacion">En negociación</option><option value="activo">Cliente activo</option><option value="finalizado">Finalizado</option></select>
+          </label>
+        </div>
+
+        <div class="caja">
+          <h2>Datos del cliente</h2>
+          <div class="fila">
+            <label class="campo req">Nombre completo <i class="ast">*</i><input name="nombre" autocomplete="off"></label>
+            <div class="fila dos">
+              <label class="campo req">Cédula de identidad <i class="ast">*</i><input name="ci" inputmode="numeric" placeholder="1.234.567-8"><span class="nota" id="notaCI">Se verifica el dígito verificador.</span></label>
+              <label class="campo req">Teléfono (WhatsApp) <i class="ast">*</i><input name="telefono" inputmode="tel" placeholder="099 123 456"></label>
+            </div>
+            <label class="campo req">Domicilio <i class="ast">*</i><input name="domicilio"></label>
+            <label class="campo">Correo personal<input name="correo" type="email" inputmode="email"><span class="nota">Es el correo de recuperación de sus cuentas.</span></label>
+          </div>
+        </div>
+
+        <div class="caja">
+          <h2>Negocio</h2>
+          <div class="fila">
+            <div class="fila dos">
+              <label class="campo">Nombre comercial<input name="comercial"></label>
+              <label class="campo">Rubro<input name="rubro" placeholder="Ej. maquillaje, ropa"></label>
+            </div>
+            <div class="fila dos">
+              <label class="campo">RUT (si tiene)<input name="rut" inputmode="numeric"></label>
+              <label class="campo">Cuenta de Google del negocio<input name="cuentaGoogle" type="email" inputmode="email"></label>
+            </div>
+          </div>
+        </div>
+
+        <div class="caja">
+          <h2 class="req">Servicios contratados</h2>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="s_google"> Presencia en Google (ficha de Google Maps)</label>
+            <label class="check"><input type="checkbox" name="s_web"> Tienda web</label>
+            <label class="check"><input type="checkbox" name="s_360"> Tienda 360</label>
+            <label class="check"><input type="checkbox" name="s_3d"> Tienda 3D</label>
+            <label class="check"><input type="checkbox" name="s_panel"> Panel de edición (precios, stock y promociones)</label>
+            <label class="check"><input type="checkbox" name="s_fotos"> Fotografía de productos</label>
+            <label class="campo" id="campoFotos" hidden>Cantidad y tipo de fotos<input name="fotosDetalle" placeholder="Ej. 30 productos, fondo blanco"></label>
+            <label class="check"><input type="checkbox" name="s_mant"> Mantenimiento mensual</label>
+          </div>
+        </div>
+
+        <div class="caja">
+          <h2>Acuerdo económico</h2>
+          <div class="fila">
+            <div class="fila dos">
+              <label class="campo req">Precio de los servicios ($) <i class="ast">*</i><input name="precio" type="number" min="0" step="1" inputmode="numeric"></label>
+              <label class="campo">Bonificación (%)<input name="bonif" type="number" min="0" max="100" step="1" inputmode="numeric" placeholder="0"></label>
+            </div>
+            <div class="fila dos">
+              <label class="campo">Anticipo al firmar ($)<input name="anticipo" type="number" min="0" step="1" inputmode="numeric"></label>
+              <label class="campo" id="campoMant" hidden>Mantenimiento por mes ($)<input name="mantMonto" type="number" min="0" step="1" inputmode="numeric"></label>
+            </div>
+            <div class="fila dos">
+              <label class="campo req">Fecha de inicio <i class="ast">*</i><input name="inicio" type="date"></label>
+              <label class="campo req">Plazo de entrega <i class="ast">*</i><input name="plazo" placeholder="Ej. 20 días hábiles"></label>
+            </div>
+          </div>
+          <div class="resumen" id="resumen"></div>
+        </div>
+
+        <div class="caja">
+          <h2>Portafolio y notas</h2>
+          <div class="checks">
+            <label class="check"><input type="checkbox" name="portafolio"> Autoriza mostrar el trabajo y citar resultados en mi portafolio</label>
+          </div>
+          <label class="campo" style="margin-top:10px">Notas internas (no salen en el contrato)<textarea name="notas"></textarea></label>
+        </div>
+      </form>
+      <div class="faltan" id="faltan" hidden></div>
+      <div class="acciones">
+        <button class="btn" id="guardar">Guardar ficha</button>
+        <button class="btn cuero" id="contrato">Generar contrato</button>
+        <button class="btn sec" id="borrar" hidden>Eliminar</button>
+      </div>
+    </section>
+
+    <!-- MIS DATOS -->
+    <section data-panel="misdatos" hidden>
+      <div class="caja">
+        <h2>Tus datos como prestador</h2>
+        <p class="nota" style="margin-bottom:10px">Aparecen en todos los contratos. Se cargan una sola vez.</p>
+        <form id="formYo" class="fila" onsubmit="return false">
+          <label class="campo">Nombre completo<input name="nombre"></label>
+          <div class="fila dos">
+            <label class="campo">Cédula de identidad<input name="ci" inputmode="numeric"></label>
+            <label class="campo">Teléfono<input name="telefono" inputmode="tel"></label>
+          </div>
+          <label class="campo">Domicilio<input name="domicilio"></label>
+          <label class="campo">Correo<input name="correo" type="email"></label>
+        </form>
+        <div class="acciones" style="margin-top:12px"><button class="btn" id="guardarYo">Guardar mis datos</button></div>
+      </div>
+    </section>
+  </div>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+/* =========================================================
+   CONFIGURACIÓN (mismo proyecto de Firebase que el Panel)
+   Reglas: la rama "privado" solo la lee y la escribe tu cuenta.
+   ========================================================= */
+const FIREBASE_CONFIG = {
+  apiKey: "AIzaSyDd_-6HZlvoZh-pK0mnzuHrcEb7bW9Cc2o",
+  authDomain: "que-facha.firebaseapp.com",
+  databaseURL: "https://que-facha-default-rtdb.firebaseio.com",
+  projectId: "que-facha",
+  storageBucket: "que-facha.firebasestorage.app",
+  messagingSenderId: "1028320902009",
+  appId: "1:1028320902009:web:0d3b62564ab006c6e00da8"
+};
+const CORREO_DUENO = 'quefacha.durazno@gmail.com';
+const RUTA = 'privado';
+const YO_INICIAL = { nombre: 'Juan Pablo Nuñez Fernandez', ci: '', telefono: '091 782 945', domicilio: '', correo: 'quefacha.durazno@gmail.com' };
+
+const $ = id => document.getElementById(id);
+$('toldo').innerHTML = '<span></span>'.repeat(40);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function toast(t) { const e = $('toast'); e.textContent = t; e.classList.add('visible'); clearTimeout(toast.t); toast.t = setTimeout(() => e.classList.remove('visible'), 2000); }
+const pesos = n => '$ ' + Math.round(Number(n) || 0).toLocaleString('es-UY');
+
+/* ---------- Almacenamiento: Firebase o, sin configuración, este navegador ---------- */
+let clientes = {}, yo = { ...YO_INICIAL }, actual = null, ref = null;
+const Almacen = {
+  demo: !FIREBASE_CONFIG,
+  leerLocal() { try { const d = JSON.parse(localStorage.getItem('qf-clientes-demo')) || {}; clientes = d.clientes || {}; yo = { ...YO_INICIAL, ...(d.yo || {}) }; } catch (e) {} },
+  guardarLocal() { localStorage.setItem('qf-clientes-demo', JSON.stringify({ clientes, yo })); },
+  async guardarCliente(c) { clientes[c.id] = c; if (this.demo) return this.guardarLocal(); await ref.child('clientes/' + c.id).set(c); },
+  async borrarCliente(id) { delete clientes[id]; if (this.demo) return this.guardarLocal(); await ref.child('clientes/' + id).remove(); },
+  async guardarYo(d) { yo = d; if (this.demo) return this.guardarLocal(); await ref.child('config/prestador').set(d); }
+};
+
+/* ---------- Cédula uruguaya: dígito verificador ---------- */
+function ciValida(ci) {
+  const n = String(ci).replace(/\D/g, ''); if (n.length < 7 || n.length > 8) return false;
+  const base = n.slice(0, -1).padStart(7, '0'), dv = +n.slice(-1), pesos = [2, 9, 8, 7, 6, 3, 4];
+  const suma = pesos.reduce((s, p, i) => s + p * +base[i], 0); return (10 - (suma % 10)) % 10 === dv;
+}
+function ciFormato(ci) { const n = String(ci).replace(/\D/g, ''); if (n.length < 7) return ci; const c = n.slice(0, -1), d = n.slice(-1);
+  return c.replace(/\B(?=(\d{3})+(?!\d))/g, '.') + '-' + d; }
+
+/* ---------- Números en letras (pesos) ---------- */
+function enLetras(n) {
+  n = Math.round(n); if (n === 0) return 'cero';
+  const U = ['', 'uno', 'dos', 'tres', 'cuatro', 'cinco', 'seis', 'siete', 'ocho', 'nueve', 'diez', 'once', 'doce', 'trece', 'catorce', 'quince', 'dieciséis', 'diecisiete', 'dieciocho', 'diecinueve', 'veinte',
+    'veintiuno', 'veintidós', 'veintitrés', 'veinticuatro', 'veinticinco', 'veintiséis', 'veintisiete', 'veintiocho', 'veintinueve'];
+  const D = ['', '', '', 'treinta', 'cuarenta', 'cincuenta', 'sesenta', 'setenta', 'ochenta', 'noventa'];
+  const C = ['', 'ciento', 'doscientos', 'trescientos', 'cuatrocientos', 'quinientos', 'seiscientos', 'setecientos', 'ochocientos', 'novecientos'];
+  const menor1000 = x => { if (x === 100) return 'cien'; const c = Math.floor(x / 100), r = x % 100; let s = C[c];
+    if (r) s += (s ? ' ' : '') + (r < 30 ? U[r] : D[Math.floor(r / 10)] + (r % 10 ? ' y ' + U[r % 10] : '')); return s; };
+  const mill = Math.floor(n / 1e6), miles = Math.floor((n % 1e6) / 1000), resto = n % 1000; let out = [];
+  if (mill) out.push(mill === 1 ? 'un millón' : menor1000(mill).replace(/veintiuno$/, 'veintiún').replace(/uno$/, 'un') + ' millones');
+  if (miles) out.push(miles === 1 ? 'mil' : menor1000(miles).replace(/veintiuno$/, 'veintiún').replace(/uno$/, 'un') + ' mil');
+  if (resto) out.push(menor1000(resto));
+  return out.join(' ');
+}
+const fechaLarga = iso => { if (!iso) return ''; const [a, m, d] = iso.split('-').map(Number);
+  return `${d} de ${['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'][m - 1]} de ${a}`; };
+
+/* ---------- Formulario ---------- */
+const form = $('ficha');
+const SERV = [['s_google', 'Presencia en Google: creación o puesta a punto de la ficha de Google Maps del negocio.'], ['s_web', 'Tienda web: catálogo con carrito y envío de pedidos por WhatsApp.'],
+  ['s_360', 'Tienda 360: sala virtual de exhibición con productos destacados, carrito y pedidos por WhatsApp.'], ['s_3d', 'Tienda 3D: espacio virtual navegable con productos destacados, carrito y pedidos por WhatsApp.'],
+  ['s_panel', 'Panel de edición para cambiar precios, promociones y stock.'], ['s_fotos', 'Fotografía de productos'], ['s_mant', 'Mantenimiento mensual, según la cláusula DÉCIMO.']];
+function leerForm() {
+  const f = new FormData(form), o = {};
+  for (const [k, v] of f.entries()) o[k] = typeof v === 'string' ? v.trim() : v;
+  form.querySelectorAll('input[type=checkbox]').forEach(c => o[c.name] = c.checked);
+  ['precio', 'bonif', 'anticipo', 'mantMonto'].forEach(k => o[k] = Math.max(0, Number(o[k]) || 0));
+  o.bonif = Math.min(100, o.bonif);
+  return o;
+}
+function cargarForm(c) {
+  form.reset();
+  Object.entries(c).forEach(([k, v]) => { const el = form.elements[k]; if (!el) return; if (el.type === 'checkbox') el.checked = !!v; else el.value = v ?? ''; });
+  actualizarFicha();
+}
+const precioFinal = c => Math.round(c.precio * (1 - (c.bonif || 0) / 100));
+function faltantes(c) {
+  const f = [];
+  if (!c.nombre) f.push('nombre'); if (!c.ci) f.push('cédula'); else if (!ciValida(c.ci)) f.push('cédula válida');
+  if (!c.telefono) f.push('teléfono'); if (!c.domicilio) f.push('domicilio');
+  if (!SERV.some(([k]) => c[k])) f.push('al menos un servicio');
+  if (!(c.precio > 0)) f.push('precio'); if (!c.inicio) f.push('fecha de inicio'); if (!c.plazo) f.push('plazo');
+  if (c.s_mant && !(c.mantMonto > 0)) f.push('monto del mantenimiento');
+  if (precioFinal(c) > 0 && c.anticipo > precioFinal(c)) f.push('anticipo menor o igual al precio final');
+  return f;
+}
+function actualizarFicha() {
+  const c = leerForm();
+  $('campoFotos').hidden = !c.s_fotos; $('campoMant').hidden = !c.s_mant;
+  const nota = $('notaCI');
+  if (c.ci) { const ok = ciValida(c.ci); nota.textContent = ok ? 'Cédula válida ✓' : 'El dígito verificador no coincide. Revisá el número.'; nota.className = 'nota' + (ok ? '' : ' error');
+    form.elements.ci.closest('label').classList.toggle('mal', !ok); } else { nota.textContent = 'Se verifica el dígito verificador.'; nota.className = 'nota'; form.elements.ci.closest('label').classList.remove('mal'); }
+  const pf = precioFinal(c), saldo = Math.max(0, pf - c.anticipo);
+  $('resumen').innerHTML = c.precio > 0 ? `<span>Precio: ${pesos(c.precio)}${c.bonif ? ` · bonificación ${c.bonif} %` : ''}</span>
+    <span>Precio final: <b>${pesos(pf)}</b></span>${pf > 0 ? `<span>Anticipo ${pesos(c.anticipo)} · saldo a la entrega ${pesos(saldo)}</span>` : '<span>Sin costo para el cliente.</span>'}
+    ${c.s_mant && c.mantMonto ? `<span>Mantenimiento: ${pesos(c.mantMonto)} por mes</span>` : ''}` : '<span>Completá el precio para ver el resumen.</span>';
+  const f = faltantes(c);
+  $('faltan').hidden = !f.length; $('faltan').innerHTML = f.length ? `<b>Para generar el contrato falta:</b> ${f.join(', ')}.` : '';
+  $('contrato').disabled = !!f.length;
+}
+form.addEventListener('input', actualizarFicha); form.addEventListener('change', actualizarFicha);
+form.elements.ci.addEventListener('blur', () => { if (ciValida(form.elements.ci.value)) form.elements.ci.value = ciFormato(form.elements.ci.value); });
+
+/* ---------- Lista ---------- */
+const ETAPAS = { prospecto: 'Prospecto', negociacion: 'En negociación', activo: 'Cliente activo', finalizado: 'Finalizado' };
+function pintarLista() {
+  const q = $('buscar').value.trim().toLowerCase();
+  const arr = Object.values(clientes).filter(c => !q || [c.nombre, c.comercial, c.telefono, c.rubro].join(' ').toLowerCase().includes(q)).sort((a, b) => (b.actualizado || 0) - (a.actualizado || 0));
+  $('lista').innerHTML = arr.length ? arr.map(c => `<button class="cliente" data-id="${c.id}"><span><b>${esc(c.comercial || c.nombre || 'Sin nombre')}</b>
+    <small>${esc(c.comercial ? c.nombre : '')}${c.comercial && c.telefono ? ' · ' : ''}${esc(c.telefono || '')}</small></span><span class="estado e-${c.estado || 'prospecto'}">${ETAPAS[c.estado] || 'Prospecto'}</span></button>`).join('')
+    : `<p class="vacio">${q ? 'No hay clientes con esa búsqueda.' : 'Todavía no cargaste clientes.'}</p>`;
+}
+$('buscar').addEventListener('input', pintarLista);
+$('lista').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; abrirFicha(clientes[b.dataset.id]); });
+function irTab(t) { document.querySelectorAll('.pestana').forEach(p => p.classList.toggle('activa', p.dataset.tab === t)); document.querySelectorAll('[data-panel]').forEach(p => p.hidden = p.dataset.panel !== t); scrollTo(0, 0); }
+document.querySelector('.pestanas').addEventListener('click', e => { const b = e.target.closest('[data-tab]'); if (!b) return; if (b.dataset.tab === 'ficha' && !actual) return nuevoCliente(); irTab(b.dataset.tab); if (b.dataset.tab === 'lista') pintarLista(); });
+function abrirFicha(c) { actual = c; cargarForm(c); $('borrar').hidden = false; irTab('ficha'); }
+function nuevoCliente() { actual = { id: 'c' + Date.now().toString(36), creado: Date.now(), estado: 'prospecto' }; cargarForm(actual); $('borrar').hidden = true; irTab('ficha'); form.elements.nombre.focus(); }
+$('nuevo').addEventListener('click', nuevoCliente);
+$('guardar').addEventListener('click', async () => {
+  const c = { ...actual, ...leerForm(), actualizado: Date.now() };
+  if (!c.nombre && !c.comercial) return toast('Escribí al menos el nombre');
+  if (c.ci && ciValida(c.ci)) c.ci = ciFormato(c.ci);
+  try { await Almacen.guardarCliente(c); actual = c; $('borrar').hidden = false; toast('Ficha guardada'); } catch (e) { toast('No se pudo guardar: revisá la conexión'); }
+});
+$('borrar').addEventListener('click', async () => {
+  if (!actual || !confirm(`¿Eliminar la ficha de ${actual.nombre || 'este cliente'}? No se puede deshacer.`)) return;
+  try { await Almacen.borrarCliente(actual.id); actual = null; irTab('lista'); pintarLista(); toast('Ficha eliminada'); } catch (e) { toast('No se pudo eliminar'); }
+});
+
+/* ---------- Mis datos ---------- */
+const formYo = $('formYo');
+function cargarYo() { Object.entries(yo).forEach(([k, v]) => { if (formYo.elements[k]) formYo.elements[k].value = v || ''; }); }
+$('guardarYo').addEventListener('click', async () => {
+  const d = {}; for (const [k, v] of new FormData(formYo).entries()) d[k] = String(v).trim();
+  if (d.ci && ciValida(d.ci)) d.ci = ciFormato(d.ci);
+  try { await Almacen.guardarYo(d); cargarYo(); toast('Tus datos quedaron guardados'); } catch (e) { toast('No se pudo guardar'); }
+});
+
+/* ---------- Excel ---------- */
+$('excel').addEventListener('click', () => {
+  if (typeof XLSX === 'undefined') return toast('Se necesita conexión a internet');
+  const filas = Object.values(clientes).sort((a, b) => (a.creado || 0) - (b.creado || 0)).map(c => ({
+    'Etapa': ETAPAS[c.estado] || '', 'Nombre': c.nombre || '', 'Cédula': c.ci || '', 'Teléfono': c.telefono || '', 'Correo': c.correo || '', 'Domicilio': c.domicilio || '',
+    'Nombre comercial': c.comercial || '', 'Rubro': c.rubro || '', 'RUT': c.rut || '', 'Cuenta de Google del negocio': c.cuentaGoogle || '',
+    'Servicios': SERV.filter(([k]) => c[k]).map(([k, t]) => t.split(':')[0].replace(/\.$/, '').replace(', según la cláusula DÉCIMO', '')).join(' · '),
+    'Precio': c.precio || 0, 'Bonificación %': c.bonif || 0, 'Precio final': precioFinal({ precio: c.precio || 0, bonif: c.bonif || 0 }), 'Anticipo': c.anticipo || 0,
+    'Mantenimiento mensual': c.s_mant ? (c.mantMonto || 0) : 0, 'Inicio': c.inicio || '', 'Plazo': c.plazo || '', 'Portafolio': c.portafolio ? 'Sí' : 'No', 'Notas': c.notas || '',
+    'Alta': c.creado ? new Date(c.creado).toLocaleDateString('es-UY') : '' }));
+  if (!filas.length) return toast('Todavía no hay clientes');
+  const hoja = XLSX.utils.json_to_sheet(filas); hoja['!cols'] = Object.keys(filas[0]).map(k => ({ wch: Math.max(10, Math.min(40, k.length + 4)) }));
+  const libro = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(libro, hoja, 'Clientes');
+  XLSX.writeFile(libro, `clientes_que_facha_${new Date().toISOString().slice(0, 10)}.xlsx`);
+});
+
+/* ---------- Contrato ---------- */
+$('contrato').addEventListener('click', () => {
+  const c = { ...actual, ...leerForm() }; if (faltantes(c).length) return;
+  if (c.ci && ciValida(c.ci)) c.ci = ciFormato(c.ci);
+  const pf = precioFinal(c), saldo = Math.max(0, pf - c.anticipo), hoy = new Date().toISOString().slice(0, 10), y = yo;
+  const X = v => v ? `<b>${esc(v)}</b>` : '<span class="linea">________________</span>';
+  const ck = on => on ? '☒' : '☐';
+  const conTienda = c.s_web || c.s_360 || c.s_3d;
+  const filasAnexo = [['Cuenta de Google', c.cuentaGoogle, 'Cuenta madre del negocio', 'Ninguno']];
+  if (conTienda) filasAnexo.push(['GitHub', '', 'Guarda el código de la tienda', 'Colaborador'], ['GitHub Pages', '', 'Publica la tienda en internet', 'Colaborador'], ['WhatsApp Business', c.telefono, 'Recibe los pedidos', 'Ninguno']);
+  if (c.s_panel) filasAnexo.push(['Firebase', '', 'Guarda los datos del panel de edición', 'Colaborador']);
+  if (c.s_google) filasAnexo.push(['Ficha de Google', c.comercial, 'Aparecer en Google Maps', 'Administrador']);
+  const precioTxt = pf === 0
+    ? `El precio de los servicios es de <b>${pesos(c.precio)}</b> (${enLetras(c.precio)} pesos uruguayos), con una bonificación del <b>100 %</b>, por lo que no tienen costo para el Cliente.`
+    : `El precio de los servicios es de <b>${pesos(c.precio)}</b> (${enLetras(c.precio)} pesos uruguayos)${c.bonif ? `, con una bonificación del <b>${c.bonif} %</b>, por lo que el precio final es de <b>${pesos(pf)}</b> (${enLetras(pf)} pesos uruguayos)` : ''}. ${c.anticipo ? `Se abona un anticipo de <b>${pesos(c.anticipo)}</b> al firmar este contrato y el saldo de <b>${pesos(saldo)}</b> al momento de la entrega.` : 'El precio se abona al momento de la entrega.'} La transferencia de las fotografías, si corresponde, se completa con el pago total.`;
+  const html = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contrato ${esc(c.comercial || c.nombre)} — qué facha</title>
+<style>
+  @page { size: A4; margin: 18mm 18mm 20mm; }
+  * { box-sizing: border-box; }
+  body { font-family: Arial, Helvetica, sans-serif; color: #222; font-size: 10.5pt; line-height: 1.5; max-width: 800px; margin: 0 auto; padding: 16px; }
+  h1 { font-size: 16pt; text-align: center; margin: 0; letter-spacing: .02em; }
+  .sub { text-align: center; font-weight: 700; font-size: 11pt; margin: 2px 0; }
+  .marca { text-align: center; color: #6B5A5E; font-size: 9.5pt; border-bottom: 2px solid #C9A45C; padding-bottom: 8px; margin-bottom: 14px; }
+  h2 { font-size: 11pt; color: #7A2E42; margin: 16px 0 6px; break-after: avoid; }
+  p { margin: 0 0 8px; text-align: justify; }
+  ul, ol { margin: 0 0 8px 22px; padding: 0; } li { margin-bottom: 3px; text-align: justify; }
+  .ck { list-style: none; margin-left: 6px; } .ck li::before { content: attr(data-c) " "; font-size: 12pt; }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; font-size: 9.5pt; break-inside: avoid; }
+  th, td { border: 1px solid #BFA7A5; padding: 6px 7px; text-align: left; vertical-align: top; }
+  th { background: #7A2E42; color: #fff; }
+  .firmas td { border: 1px solid #BFA7A5; height: 30px; }
+  .linea { color: #999; }
+  .salto { break-before: page; }
+  .pie { margin-top: 30px; font-size: 8.5pt; color: #888; text-align: center; }
+  .noimprimir { position: sticky; top: 0; background: #F2EEE6; padding: 10px; display: flex; gap: 8px; justify-content: center; border-radius: 10px; margin-bottom: 12px; font-family: system-ui, sans-serif; }
+  .noimprimir button { border: 0; background: #2E2F33; color: #F2EEE6; border-radius: 10px; padding: 10px 16px; font-weight: 700; font-size: 15px; }
+  @media print { .noimprimir { display: none; } body { padding: 0; } }
+</style></head><body>
+<div class="noimprimir"><button onclick="print()">Guardar como PDF o imprimir</button></div>
+<h1>CONTRATO DE SERVICIOS DIGITALES</h1>
+<p class="sub">Y TRANSFERENCIA DE TITULARIDAD DE CUENTAS Y ACTIVOS DIGITALES</p>
+<p class="marca">Qué Facha · Durazno, Uruguay</p>
+<p>En la ciudad de Durazno, el día ${X(fechaLarga(hoy))}, se celebra el presente contrato entre las partes que se identifican a continuación.</p>
+<h2>PRIMERO. Partes</h2>
+<p>Por una parte, ${X(y.nombre)}, cédula de identidad N.º ${X(y.ci)}, con domicilio en ${X(y.domicilio)}, teléfono ${X(y.telefono)} y correo ${X(y.correo)}, quien actúa bajo el nombre comercial «Qué Facha», en adelante «el Prestador».</p>
+<p>Por otra parte, ${X(c.nombre)}, cédula de identidad N.º ${X(c.ci)}, con domicilio en ${X(c.domicilio)}, teléfono ${X(c.telefono)}${c.correo ? ` y correo personal ${X(c.correo)}` : ''}${c.comercial ? `, titular del emprendimiento «<b>${esc(c.comercial)}</b>»${c.rut ? `, RUT ${X(c.rut)}` : ''}` : ''}, en adelante «el Cliente».</p>
+<p>Ambas partes se reconocen mutuamente capacidad para contratar y acreditan su identidad con la cédula de identidad exhibida en este acto.</p>
+<h2>SEGUNDO. Objeto</h2>
+<p>El Prestador realizará para el Cliente los servicios marcados a continuación:</p>
+<ul class="ck">${SERV.map(([k, t]) => `<li data-c="${ck(c[k])}">${k === 's_fotos' ? `Fotografía de productos${c.s_fotos && c.fotosDetalle ? `: <b>${esc(c.fotosDetalle)}</b>` : ''}.` : t}</li>`).join('')}</ul>
+<h2>TERCERO. Titularidad</h2>
+<p>Todas las cuentas, servicios y contenidos creados para este trabajo son propiedad del Cliente desde su creación, y se registran a su nombre o al de su emprendimiento. Esto incluye:</p>
+<ul><li>La cuenta de Google del negocio${c.cuentaGoogle ? ` (<b>${esc(c.cuentaGoogle)}</b>)` : ''} y los servicios asociados a ella.</li>
+${conTienda ? '<li>La cuenta de GitHub donde se aloja el código de la tienda y su publicación en GitHub Pages.</li>' : ''}
+${c.s_panel ? '<li>El proyecto de Firebase que almacena los datos del panel de edición.</li>' : ''}
+${c.s_google ? '<li>La ficha de Google Maps del negocio.</li>' : ''}
+<li>El dominio web, si se contrata, registrado a nombre del Cliente.</li>
+<li>El código, el diseño y los textos entregados para su tienda o sitio.</li>
+${c.s_fotos ? '<li>Las fotografías producidas bajo este contrato, una vez abonado el precio total.</li>' : ''}</ul>
+<h2>CUARTO. Procedimiento de transferencia</h2>
+<p>Para que la titularidad sea efectiva y no dependa del Prestador, las partes cumplirán los siguientes pasos, que se verifican en el Anexo A:</p>
+<ol><li>Las cuentas se crean en presencia del Cliente, usando su número de teléfono celular.</li><li>El teléfono de recuperación de cada cuenta es el del Cliente.</li>
+<li>El correo de recuperación es un correo personal del Cliente, nunca uno del Prestador.</li><li>La verificación en dos pasos se activa en un dispositivo del Cliente.</li>
+<li>Los códigos de recuperación de GitHub se entregan al Cliente, que los guarda en un lugar seguro. El Prestador no conserva copia.</li>
+<li>Al terminar la configuración, el Prestador cierra todas las sesiones abiertas desde sus propios dispositivos.</li>
+<li>Las contraseñas quedan solo en poder del Cliente, quien puede cambiarlas en cualquier momento.</li></ol>
+<h2>QUINTO. Acceso del Prestador</h2>
+<p>El Prestador trabaja con su propia cuenta, como colaborador o administrador invitado por el Cliente en cada servicio. El Prestador no solicitará contraseñas del Cliente. El Cliente puede revocar ese acceso en cualquier momento, sin necesidad de aviso ni de justificación. Al finalizar el contrato o el mantenimiento, el Prestador retirará su acceso en un plazo máximo de cinco días hábiles.</p>
+<h2>SEXTO. Componentes reutilizables</h2>
+<p>El Cliente puede usar, modificar, copiar y encargar a terceros el mantenimiento de su tienda o sitio sin ninguna restricción. El Prestador conserva el derecho de reutilizar en otros proyectos las técnicas, herramientas y partes genéricas del código que no contengan la marca, los datos, los textos ni las imágenes del Cliente.</p>
+<h2>SÉPTIMO. Precio y forma de pago</h2>
+<p>${precioTxt}</p>
+<h2>OCTAVO. Plazos</h2>
+<p>El trabajo comienza el ${X(fechaLarga(c.inicio))} y se entrega en un plazo de ${X(c.plazo)}, contado desde que el Cliente entregue los contenidos necesarios (productos, precios, textos y fotos, si no se contrató la fotografía). Las demoras de servicios de terceros, como la verificación de Google, no se computan dentro del plazo.</p>
+<h2>NOVENO. Responsabilidades y límites</h2>
+<ul><li>El Prestador no garantiza un volumen de ventas. La difusión, la atención y la venta son responsabilidad del Cliente.</li>
+<li>Los servicios de terceros (Google, GitHub, Firebase, WhatsApp) funcionan según sus propias condiciones. El Prestador no responde por caídas, cambios o suspensiones de esos servicios.</li>
+<li>Si el Cliente modifica el código y eso provoca fallas, la reparación se cotiza aparte.</li>
+<li>El Cliente garantiza que tiene derecho a usar los contenidos que entrega (marcas, textos, imágenes).</li></ul>
+<h2>DÉCIMO. Mantenimiento</h2>
+<p>${c.s_mant ? `El mantenimiento mensual tiene un costo de <b>${pesos(c.mantMonto)}</b> (${enLetras(c.mantMonto)} pesos uruguayos), que se abona por adelantado dentro de los primeros cinco días de cada mes. Incluye las actualizaciones de precios, productos, promociones y textos que el Cliente solicite dentro del mes. Cualquiera de las partes puede darlo de baja con un aviso de quince días. La baja no afecta la titularidad ni el funcionamiento de la tienda.`
+  : 'El Cliente no contrata mantenimiento mensual en este acto. Podrá solicitarlo más adelante en las condiciones que las partes acuerden.'}</p>
+<h2>DÉCIMO PRIMERO. Datos personales y confidencialidad</h2>
+<p>Los datos personales incluidos en este contrato se usan solo para identificar a las partes y cumplir el acuerdo, conforme a la Ley N.º 18.331 de Protección de Datos Personales. El Prestador mantendrá en reserva la información del negocio del Cliente y los datos de sus compradores a los que acceda.</p>
+<h2>DÉCIMO SEGUNDO. Portafolio</h2>
+<p>El Cliente indica si autoriza al Prestador a mostrar el trabajo realizado y a citar sus resultados como parte de su portafolio:</p>
+<ul class="ck"><li data-c="${ck(c.portafolio)}">Autorizo.</li><li data-c="${ck(!c.portafolio)}">No autorizo.</li></ul>
+<h2>DÉCIMO TERCERO. Rescisión</h2>
+<p>Si el Cliente rescinde el contrato antes de la entrega, el anticipo cubre el trabajo realizado hasta ese momento. Si lo rescinde el Prestador sin causa, devolverá la parte del anticipo que corresponda al trabajo no realizado. En ambos casos, todo lo creado hasta la fecha se entrega al Cliente según las cláusulas TERCERO y CUARTO.</p>
+<h2>DÉCIMO CUARTO. Domicilios y jurisdicción</h2>
+<p>Las partes fijan como domicilios especiales los indicados en la cláusula PRIMERO, y aceptan como válidas las comunicaciones por correo electrónico y WhatsApp a los datos allí indicados. Para cualquier controversia, se someten a la ley de la República Oriental del Uruguay y a los tribunales de la ciudad de Durazno.</p>
+<p>Para constancia, se firman dos ejemplares de un mismo tenor en el lugar y la fecha indicados.</p>
+<table class="firmas"><tr><th>El Prestador</th><th>El Cliente</th></tr>
+<tr><td>Firma:</td><td>Firma:</td></tr><tr><td>Aclaración: ${esc(y.nombre)}</td><td>Aclaración: ${esc(c.nombre)}</td></tr><tr><td>C.I.: ${esc(y.ci)}</td><td>C.I.: ${esc(c.ci)}</td></tr></table>
+<div class="salto"></div>
+<h2>ANEXO A. Acta de entrega de accesos</h2>
+<p>Este anexo registra qué servicios hacen funcionar la tienda o el sitio del Cliente, para qué sirve cada uno y quién tiene acceso. Se completa y se verifica junto con el Cliente al momento de la entrega.</p>
+<table><tr><th>Servicio</th><th>Cuenta o usuario</th><th>Para qué sirve</th><th>Recuperación a nombre del Cliente</th><th>Acceso del Prestador</th></tr>
+${filasAnexo.map(r => `<tr><td>${r[0]}</td><td>${esc(r[1] || '')}</td><td>${r[2]}</td><td>☐ Sí</td><td>${r[3]}</td></tr>`).join('')}</table>
+<h2>Verificación de la transferencia</h2>
+<ul class="ck"><li data-c="☐">El teléfono de recuperación de cada cuenta es el del Cliente.</li><li data-c="☐">El correo de recuperación es un correo personal del Cliente.</li>
+<li data-c="☐">La verificación en dos pasos está activa en un dispositivo del Cliente.</li>${conTienda ? '<li data-c="☐">El Cliente recibió los códigos de recuperación de GitHub.</li>' : ''}
+<li data-c="☐">El Prestador cerró las sesiones abiertas en sus dispositivos.</li><li data-c="☐">El Cliente sabe cómo quitar el acceso del Prestador en cada servicio.</li></ul>
+<p>El Cliente declara haber verificado los puntos anteriores y recibir el control total de sus cuentas.</p>
+<table class="firmas"><tr><td>Firma del Cliente:</td><td>Fecha:</td></tr></table>
+<p class="pie">Qué Facha · Contrato de servicios digitales · ${esc(c.comercial || c.nombre)}</p>
+</body></html>`;
+  const w = window.open('', '_blank');
+  if (!w) return toast('Permití las ventanas emergentes para ver el contrato');
+  w.document.open(); w.document.write(html); w.document.close();
+  if (actual && actual.estado === 'prospecto') { form.elements.estado.value = 'negociacion'; }
+});
+
+/* ---------- Inicio ---------- */
+const cargar = src => new Promise((ok, mal) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = mal; document.head.appendChild(s); });
+function mostrarApp() { $('panelIngreso').hidden = true; $('app').hidden = false; cargarYo(); pintarLista(); }
+(async function iniciar() {
+  if (Almacen.demo) { $('avisoDemo').hidden = false; Almacen.leerLocal(); mostrarApp(); return; }
+  try {
+    const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
+    await cargar(base + 'firebase-app-compat.js'); await cargar(base + 'firebase-database-compat.js'); await cargar(base + 'firebase-auth-compat.js');
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    const prov = new firebase.auth.GoogleAuthProvider(); prov.setCustomParameters({ prompt: 'select_account', login_hint: CORREO_DUENO });
+    const err = e => $('ayudaIngreso').textContent = 'No se pudo ingresar (' + ((e && e.code) || 'error') + ').';
+    firebase.auth().getRedirectResult().catch(err);
+    $('ingresar').addEventListener('click', () => firebase.auth().signInWithPopup(prov).catch(e => { err(e); if (e.code === 'auth/popup-blocked') firebase.auth().signInWithRedirect(prov).catch(err); }));
+    $('salir').addEventListener('click', () => firebase.auth().signOut());
+    firebase.auth().onAuthStateChanged(async u => {
+      if (u && (u.email || '').toLowerCase() !== CORREO_DUENO) { const c = u.email; await firebase.auth().signOut(); $('ayudaIngreso').textContent = `La cuenta ${c} no tiene acceso.`; return; }
+      $('sesion').hidden = !u; if (!u) { $('panelIngreso').hidden = false; $('app').hidden = true; return; }
+      $('correoSesion').textContent = u.email; ref = firebase.database().ref(RUTA);
+      try {
+        const s = await ref.once('value'), v = s.val() || {};
+        clientes = v.clientes || {}; yo = { ...YO_INICIAL, ...((v.config || {}).prestador || {}) }; mostrarApp();
+      } catch (e) { $('panelIngreso').hidden = false; $('ayudaIngreso').textContent = 'Ingresaste, pero la base de datos no deja leer tus clientes: revisá las reglas de "privado" en Firebase.'; }
+    });
+  } catch (e) { $('panelIngreso').hidden = false; $('ayudaIngreso').textContent = 'No se pudo conectar. Revisá la conexión.'; }
+})();
+</script>
+</body>
+</html>
