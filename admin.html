@@ -14,6 +14,7 @@
   :root { --grafito: #2E2F33; --hueso: #F2EEE6; --hueso-2: #E2DBCF; --cuero: #B0674A; --cuero-osc: #8F4F37; --piedra: #8A8780;
     --texto-2: #58595E; --rojo: #C8372D; --verde: #3D7A4E; --fuente: "Bricolage Grotesque", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { overflow-x: hidden; }
   body { font-family: var(--fuente); background: var(--hueso); color: var(--grafito); font-size: 16px; line-height: 1.45; padding-bottom: calc(110px + env(safe-area-inset-bottom, 0px)); }
   button, input, textarea, select { font-family: inherit; font-size: inherit; color: inherit; }
   button { cursor: pointer; }
@@ -30,7 +31,7 @@
   .sesion { font-size: 14px; color: var(--texto-2); margin-bottom: 12px; }
   .sesion button { background: none; border: 0; text-decoration: underline; color: var(--grafito); font-size: 14px; }
   .aviso { background: var(--grafito); color: var(--hueso); border-radius: 14px; padding: 12px 14px; font-size: 14px; margin-bottom: 14px; }
-  .pestanas { display: flex; gap: 6px; margin-bottom: 14px; }
+  .pestanas { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
   .pestana { border: 2px solid var(--hueso-2); background: #fff; border-radius: 999px; padding: 8px 16px; font-weight: 600; font-size: 15px; }
   .pestana.activa { background: var(--grafito); border-color: var(--grafito); color: var(--hueso); }
   .item { background: #fff; border: 1px solid var(--hueso-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; display: grid; grid-template-columns: 84px 1fr; gap: 12px; }
@@ -80,6 +81,21 @@
   .stk { width: 40px; height: 40px; border-radius: 10px; border: 2px solid var(--hueso-2); background: #fff; padding: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; color: var(--piedra); }
   .stk svg { width: 100%; height: 100%; }
   .stk[aria-pressed="true"] { border-color: var(--grafito); background: #F7F4EE; }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .kpi { background: #fff; border: 1px solid var(--hueso-2); border-radius: 14px; padding: 12px; }
+  .kpi span { font-size: 13px; color: var(--texto-2); } .kpi b { display: block; font-size: 26px; letter-spacing: -0.02em; }
+  .caja-stats { background: #fff; border: 1px solid var(--hueso-2); border-radius: 16px; padding: 14px; margin-bottom: 12px; }
+  .caja-stats h3 { font-size: 16px; margin-bottom: 10px; }
+  .grafico { display: flex; align-items: flex-end; gap: 3px; height: 150px; border-bottom: 2px solid var(--hueso-2); }
+  .grafico .col { flex: 1; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; height: 100%; position: relative; }
+  .grafico .v { width: 100%; background: var(--hueso-2); border-radius: 4px 4px 0 0; }
+  .grafico .w { position: absolute; bottom: 0; width: 55%; background: var(--cuero); border-radius: 3px 3px 0 0; }
+  .ley { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -1px; }
+  .ley.v { background: var(--hueso-2); } .ley.w { background: var(--cuero); }
+  .barra-o { display: grid; grid-template-columns: 90px 1fr 36px; gap: 8px; align-items: center; margin: 6px 0; font-size: 14px; }
+  .barra-o i { display: block; height: 14px; background: var(--grafito); border-radius: 7px; }
+  .barra-o .f { background: var(--hueso); border-radius: 7px; overflow: hidden; }
+  .barra-o b { text-align: right; }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline: 3px solid var(--cuero); outline-offset: 2px; }
 </style>
 </head>
@@ -103,6 +119,7 @@
       <button class="pestana activa" data-tab="novedades">Novedades</button>
       <button class="pestana" data-tab="servicios">Servicios</button>
       <button class="pestana" data-tab="tema">Tema</button>
+      <button class="pestana" data-tab="stats">Estadísticas</button>
     </div>
     <section data-panel="novedades">
       <button class="agregar" data-agregar="novedades">+ Nueva novedad</button>
@@ -117,6 +134,14 @@
     <section data-panel="tema" hidden>
       <p class="ayuda" style="margin:0 0 12px">Cambia los colores de tu web para cada temporada. La tipografía y el logo no cambian.</p>
       <div class="temas" id="listaTemas"></div>
+    </section>
+    <section data-panel="stats" hidden>
+      <div class="botones" style="margin:0 0 12px" id="periodos"><button class="chip" data-dias="7" aria-pressed="true">7 días</button><button class="chip" data-dias="30" aria-pressed="false">30 días</button><button class="chip" data-dias="90" aria-pressed="false">90 días</button></div>
+      <div class="kpis" id="kpis"></div>
+      <div class="caja-stats"><h3>Visitas y consultas por día</h3><div id="grafico" class="grafico"></div><p class="ayuda" style="margin-top:8px"><span class="ley v"></span> visitas &nbsp; <span class="ley w"></span> toques en WhatsApp</p></div>
+      <div class="caja-stats"><h3>De dónde llegan</h3><div id="origenes"></div><p class="ayuda" style="margin-top:6px">"Directo" incluye enlaces abiertos desde WhatsApp, que no informan su origen.</p></div>
+      <div class="caja-stats"><h3>Cómo te encuentran en Google</h3><p class="ayuda" style="margin:0 0 10px">Las búsquedas con las que aparecés y los clics desde Google están en Search Console.</p><a class="chip" href="https://search.google.com/search-console" target="_blank" rel="noopener" style="text-decoration:none;display:inline-block">Abrir Search Console ↗</a></div>
+      <p class="ayuda">Tus propias visitas desde este navegador no se cuentan.</p>
     </section>
     <button class="descartar" id="descartar">Descartar los cambios sin publicar</button>
   </div>
@@ -291,8 +316,27 @@ $('publicar').addEventListener('click', async () => {
   } catch (err) { $('estado').className = 'estado mal'; $('estado').textContent = /PERMISSION_DENIED|permission/i.test(String(err && (err.code || err.message))) ? 'Esta cuenta no tiene permiso para publicar. Revisá las reglas en Firebase.' : 'No se pudo publicar. Revisá la conexión.'; }
   $('publicar').textContent = 'Publicar cambios'; revisar();
 });
+/* ---------- Estadísticas ---------- */
+let statsDias = {}, periodo = 7;
+function clave(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+function pintarStats() {
+  const dias = []; for (let i = periodo - 1; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); dias.push(clave(d)); }
+  const val = (k, m) => Number((statsDias[k] || {})[m]) || 0, suma = m => dias.reduce((s, k) => s + val(k, m), 0);
+  const v = suma('visitas'), w = suma('whatsapp'), t = suma('tiendas');
+  $('kpis').innerHTML = [['Visitas', v], ['Toques en WhatsApp', w], ['Consultas por visita', v ? Math.round(w / v * 100) + ' %' : '—'], ['Clics a las tiendas', t]]
+    .map(([n, x]) => `<div class="kpi"><span>${n}</span><b>${x}</b></div>`).join('');
+  const max = Math.max(1, ...dias.map(k => val(k, 'visitas')));
+  $('grafico').innerHTML = dias.map(k => `<div class="col" title="${k}: ${val(k, 'visitas')} visitas, ${val(k, 'whatsapp')} WhatsApp"><div class="v" style="height:${val(k, 'visitas') / max * 100}%"></div><div class="w" style="height:${val(k, 'whatsapp') / max * 100}%"></div></div>`).join('');
+  const or = [['Google', 'origen_google'], ['Instagram', 'origen_instagram'], ['Facebook', 'origen_facebook'], ['Otros sitios', 'origen_otros'], ['Directo', 'origen_directo']].map(([n, m]) => [n, suma(m)]);
+  const mo = Math.max(1, ...or.map(x => x[1]));
+  $('origenes').innerHTML = or.map(([n, x]) => `<div class="barra-o"><span>${n}</span><span class="f"><i style="width:${x / mo * 100}%"></i></span><b>${x}</b></div>`).join('');
+}
+$('periodos').addEventListener('click', e => { const b = e.target.closest('[data-dias]'); if (!b) return; periodo = +b.dataset.dias;
+  document.querySelectorAll('#periodos .chip').forEach(c => c.setAttribute('aria-pressed', c === b)); pintarStats(); });
+
 (async function iniciar() {
-  if (!FIREBASE_CONFIG) { $('avisoConfig').hidden = false; publicado = JSON.parse(JSON.stringify(datos)); $('editor').hidden = false; $('barra').hidden = false; dibujar(); return; }
+  if (!FIREBASE_CONFIG) { for (let i = 0; i < 30; i++) { const d = new Date(); d.setDate(d.getDate() - i); const v = 3 + Math.round(Math.random() * 12); statsDias[clave(d)] = { visitas: v, whatsapp: Math.round(v * Math.random() * .3), tiendas: Math.round(v * .2), origen_google: Math.round(v * .3), origen_instagram: Math.round(v * .3), origen_directo: Math.round(v * .4) }; } pintarStats();
+    $('avisoConfig').hidden = false; publicado = JSON.parse(JSON.stringify(datos)); $('editor').hidden = false; $('barra').hidden = false; dibujar(); return; }
   try {
     const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
     await cargar(base + 'firebase-app-compat.js'); await cargar(base + 'firebase-database-compat.js'); await cargar(base + 'firebase-auth-compat.js');
@@ -308,6 +352,8 @@ $('publicar').addEventListener('click', async () => {
       try { const s = await firebase.database().ref(RUTA_SITIO).once('value'); datos = normalizar(s.val()); }
       catch (err) { datos = normalizar(null); $('estado').className = 'estado mal'; $('estado').textContent = 'La base de datos no deja leer: revisá las reglas en Firebase.'; }
       publicado = JSON.parse(JSON.stringify(datos)); dibujar();
+      try { localStorage.setItem('qf-no-contar', '1'); } catch (e) {}
+      firebase.database().ref('estadisticas/quefacha/dias').limitToLast(120).on('value', s => { statsDias = s.val() || {}; pintarStats(); }, () => {});
     });
   } catch (e) { $('panelIngreso').hidden = false; $('ayudaIngreso').textContent = 'No se pudo conectar con Firebase. Revisá la conexión.'; }
 })();

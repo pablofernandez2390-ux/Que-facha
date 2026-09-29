@@ -499,11 +499,34 @@ const RUTA_SITIO = 'sitios/quefacha';
         <div class="cuerpo"><time>${new Date(x.fecha || Date.now()).toLocaleDateString('es-UY', { day: 'numeric', month: 'long' })}</time>
         <h3>${esc(x.titulo)}</h3><p>${esc(x.texto)}</p></div></article>`).join('');
   }
+  /* ---------- Estadísticas anónimas: sin cookies ni datos personales ---------- */
+  const estadisticas = {
+    listo: false, pendientes: [],
+    sumar(m) {
+      try { if (localStorage.getItem('qf-no-contar')) return; } catch (e) {}
+      if (!this.listo) { this.pendientes.push(m); return; }
+      const d = new Date(), dia = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      firebase.database().ref('estadisticas/quefacha/dias/' + dia + '/' + m).set(firebase.database.ServerValue.increment(1)).catch(() => {});
+    }
+  };
+  try {
+    if (!sessionStorage.getItem('qf-visita')) {
+      sessionStorage.setItem('qf-visita', '1'); estadisticas.sumar('visitas');
+      const r = document.referrer || '';
+      estadisticas.sumar(/google\./i.test(r) ? 'origen_google' : /instagram\./i.test(r) ? 'origen_instagram' : /facebook\.|fb\./i.test(r) ? 'origen_facebook' : r && !r.includes(location.hostname) ? 'origen_otros' : 'origen_directo');
+    }
+  } catch (e) {}
+  document.addEventListener('click', e => {
+    const a = e.target.closest('a[href]'); if (!a) return; const h = a.getAttribute('href');
+    if (/wa\.me|whatsapp\.com/i.test(h)) estadisticas.sumar('whatsapp');
+    else if (/tienda360|tienda3D|tiendaweb/i.test(h)) estadisticas.sumar('tiendas');
+  });
   const cargar = src => new Promise((ok, mal) => { const s = document.createElement('script'); s.src = src; s.onload = ok; s.onerror = mal; document.head.appendChild(s); });
   const base = 'https://www.gstatic.com/firebasejs/10.12.2/';
   cargar(base + 'firebase-app-compat.js').then(() => cargar(base + 'firebase-database-compat.js')).then(() => {
     if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
     firebase.database().ref(RUTA_SITIO).on('value', s => pintar(s.val()));
+    estadisticas.listo = true; estadisticas.pendientes.splice(0).forEach(m => estadisticas.sumar(m));
   }).catch(() => {});
 })();
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
