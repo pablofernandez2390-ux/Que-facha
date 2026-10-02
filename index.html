@@ -8,7 +8,7 @@
 <link rel="icon" href="icons/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icons/favicon-48.png" sizes="48x48" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="/Que-facha/manifest.webmanifest">
 <meta name="theme-color" content="#2E2F33">
 <script>
 /* Temas de temporada y stickers (los mismos que en admin.html) */
@@ -529,7 +529,7 @@ const RUTA_SITIO = 'sitios/quefacha';
     estadisticas.listo = true; estadisticas.pendientes.splice(0).forEach(m => estadisticas.sumar(m));
   }).catch(() => {});
 })();
-if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js');
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/Que-facha/sw.js', { scope: '/Que-facha/' });
 </script>
 </body>
 </html>
